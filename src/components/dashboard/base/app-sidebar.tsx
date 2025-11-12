@@ -30,22 +30,22 @@ const data = {
   main: [
     {
       name: "Dashboard",
-      url: "#",
+      url: "",
       icon: Home,
     },
     {
       name: "Iventaris Barang",
-      url: "#",
+      url: "inventaris-barang",
       icon: Archive,
     },
     {
       name: "Absensi",
-      url: "#",
+      url: "absensi",
       icon: CalendarCheck,
     },
     {
       name: "laporan",
-      url: "#",
+      url: "laporan",
       icon: FileText,
     },
   ],
