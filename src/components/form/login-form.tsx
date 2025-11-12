@@ -14,28 +14,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-const formSchema = z.object({
-  email: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-});
+import { TUserLoginSchema, userLoginSchema } from "@/libs/schema";
+import { useAuth } from "@/context/auth-context";
 
 export default function LoginForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<TUserLoginSchema>({
+    resolver: zodResolver(userLoginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
+  const { login } = useAuth()
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: TUserLoginSchema) {
+    login({ email: values.email, password: values.password })
   }
+  
   return (
     <Card className="w-[400px]">
       <CardHeader>
