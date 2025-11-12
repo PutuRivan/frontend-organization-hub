@@ -34,7 +34,7 @@ const data = {
       icon: Home,
     },
     {
-      name: "Iventaris Barang",
+      name: "Inventaris Barang",
       url: "inventaris-barang",
       icon: Archive,
     },
