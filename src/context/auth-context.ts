@@ -9,6 +9,7 @@ export const AuthContext = createContext(
     user: TUser | null;
     authenticated: boolean
     token: string
+    loading: boolean
     login: ({ email, password }: TUserLoginSchema) => void;
     logout: () => void;
   },

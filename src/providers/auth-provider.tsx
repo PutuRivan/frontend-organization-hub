@@ -22,6 +22,7 @@ export default function AuthProviders({
   const [user, setUser] = useState<TUser | null>(null);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [token, setToken] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(false)
 
   const router = useRouter();
 
@@ -33,6 +34,7 @@ export default function AuthProviders({
     password: string;
   }) => {
     try {
+      setLoading(true)
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/login`,
         {
@@ -48,20 +50,25 @@ export default function AuthProviders({
 
       if (!response.ok || !data.success) {
         toast.error("Email atau password salah");
+        setLoading(false)
         return;
       }
 
       const { token, data: userData } = data;
+
       setAccessTokenInCookie(token);
       setUserDataInSessionStorage(userData)
       setUser(data.data);
       setToken(token)
       setAuthenticated(true);
+      setLoading(false)
 
-      router.push('/admin')
+      userData.role === 'Admin' ? router.push('/admin') : router.push('/personel');
       toast.success(`Selamat datang, ${userData.name}!`);
 
-    } catch (error) { }
+    } catch (error) {
+      setLoading(false)
+    }
   };
 
   const logout = () => {
@@ -86,7 +93,7 @@ export default function AuthProviders({
 
 
   return (
-    <AuthContext.Provider value={{ user, token, authenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, authenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

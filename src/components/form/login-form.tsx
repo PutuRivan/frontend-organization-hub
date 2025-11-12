@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { TUserLoginSchema, userLoginSchema } from "@/libs/schema";
 import { useAuth } from "@/context/auth-context";
+import { Spinner } from "../ui/spinner";
 
 export default function LoginForm() {
   const form = useForm<TUserLoginSchema>({
@@ -25,12 +26,12 @@ export default function LoginForm() {
       password: "",
     },
   });
-  const { login } = useAuth()
+  const { login, loading } = useAuth()
 
   async function onSubmit(values: TUserLoginSchema) {
     login({ email: values.email, password: values.password })
   }
-  
+
   return (
     <Card className="w-[400px]">
       <CardHeader>
@@ -71,8 +72,12 @@ export default function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit">
-              Submit
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? <Spinner /> : "Submit"}
             </Button>
           </form>
         </Form>
