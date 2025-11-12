@@ -1,5 +1,10 @@
+import LoginForm from "@/components/form/login-form";
+
 export default function page() {
+
   return (
-    <div>Login Page</div>
-  )
+    <main className="grid h-screen place-items-center">
+      <LoginForm />
+    </main>
+  );
 }
