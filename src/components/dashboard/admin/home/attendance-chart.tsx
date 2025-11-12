@@ -1,9 +1,17 @@
-"use client"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Card } from "@/components/ui/card";
 
-export function AttendanceChart() {
+export default function AttendanceChart() {
   // Sample data for 30 days
   const data = [
     { day: 1, attendance: 75 },
@@ -36,13 +44,15 @@ export function AttendanceChart() {
     { day: 28, attendance: 95 },
     { day: 29, attendance: 93 },
     { day: 30, attendance: 97 },
-  ]
+  ];
 
   return (
     <Card className="p-6 bg-white">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Grafik Statistik Kehadiran (30 Hari Terakhir)</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Grafik Statistik Kehadiran (30 Hari Terakhir)
+          </h3>
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold text-gray-900">95%</span>
@@ -51,9 +61,17 @@ export function AttendanceChart() {
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="day" stroke="#999" style={{ fontSize: "12px" }} tick={{ fontSize: 12 }} />
+          <XAxis
+            dataKey="day"
+            stroke="#999"
+            style={{ fontSize: "12px" }}
+            tick={{ fontSize: 12 }}
+          />
           <YAxis stroke="#999" style={{ fontSize: "12px" }} />
           <Tooltip
             contentStyle={{
@@ -73,5 +91,5 @@ export function AttendanceChart() {
         </LineChart>
       </ResponsiveContainer>
     </Card>
-  )
+  );
 }

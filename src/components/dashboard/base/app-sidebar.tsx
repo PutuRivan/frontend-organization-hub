@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Archive,
-  CalendarCheck,
-  Command,
-  FileText,
-  Home,
-} from "lucide-react";
+import { Archive, CalendarCheck, Command, FileText, Home } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import {
@@ -18,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/context/auth-context";
 import Navmain from "./nav-main";
 import NavUser from "./nav-user";
 
@@ -52,6 +47,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -71,7 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <Navmain projects={data.main} />
+        <Navmain projects={data.main} role={user?.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

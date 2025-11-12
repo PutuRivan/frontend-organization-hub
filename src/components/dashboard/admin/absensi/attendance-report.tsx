@@ -1,11 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -103,7 +104,7 @@ export function AttendanceReport() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-end">
           {/* Start Date */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tanggal Mulai</label>
+            <Label className="text-sm font-medium">Tanggal Mulai</Label>
             <Input
               type="date"
               value={startDate.split("/").reverse().join("-")}
@@ -116,7 +117,7 @@ export function AttendanceReport() {
 
           {/* End Date */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tanggal Selesai</label>
+            <Label className="text-sm font-medium">Tanggal Selesai</Label>
             <Input
               type="date"
               value={endDate.split("/").reverse().join("-")}
@@ -128,89 +129,87 @@ export function AttendanceReport() {
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleReset}
-              className="flex-1 bg-transparent"
-            >
-              Reset
-            </Button>
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-              Terapkan Filter
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="flex-1 bg-transparent"
+          >
+            Reset
+          </Button>
+          <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+            Terapkan Filter
+          </Button>
 
-          {/* Export Button */}
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExport}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Ekspor Data
-            </Button>
-          </div>
         </div>
       </Card>
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={handleExport}
+          className="gap-2"
+        >
+          <Download className="h-4 w-4" />
+          Ekspor Data
+        </Button>
+      </div>
 
       {/* Table Card */}
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted">
-              <TableHead>NAMA PERSONEL</TableHead>
-              <TableHead>JABATAN</TableHead>
-              <TableHead>TANGGAL</TableHead>
-              <TableHead>STATUS</TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted">
+            <TableHead>NAMA PERSONEL</TableHead>
+            <TableHead>JABATAN</TableHead>
+            <TableHead>TANGGAL</TableHead>
+            <TableHead>STATUS</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sampleData.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell className="font-medium">{item.name}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {item.position}
+              </TableCell>
+              <TableCell>{item.date}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="secondary"
+                  className={statusConfig[item.status].className}
+                >
+                  {statusConfig[item.status].label}
+                </Badge>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sampleData.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {item.position}
-                </TableCell>
-                <TableCell>{item.date}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={statusConfig[item.status].className}
-                  >
-                    {statusConfig[item.status].label}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+          ))}
+        </TableBody>
+      </Table>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-between border-t bg-muted/50 px-6 py-4">
-          <p className="text-sm text-muted-foreground">
-            Menampilkan 1-{itemsPerPage} dari {totalItems} hasil
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Pagination */}
+      <div className="flex items-center justify-between border-t bg-muted/50 px-6 py-4">
+        <p className="text-sm text-muted-foreground">
+          Menampilkan 1-{itemsPerPage} dari {totalItems} hasil
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -10,12 +11,13 @@ import {
 
 export default function Navmain({
   projects,
+  role
 }: {
   projects: {
     name: string;
     url: string;
     icon: LucideIcon;
-  }[];
+  }[], role: string | undefined;
 }) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -23,10 +25,10 @@ export default function Navmain({
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={`/${role?.toLowerCase()}/${item.url}`}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

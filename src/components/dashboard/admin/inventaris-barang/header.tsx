@@ -1,6 +1,6 @@
-import { Search, Bell, User } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Bell, Search, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function Header() {
   return (
@@ -9,7 +9,11 @@ export function Header() {
         <div className="flex flex-1 items-center gap-4">
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input type="text" placeholder="Search inventory..." className="pl-10" />
+            <Input
+              type="text"
+              placeholder="Search inventory..."
+              className="pl-10"
+            />
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -22,5 +26,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

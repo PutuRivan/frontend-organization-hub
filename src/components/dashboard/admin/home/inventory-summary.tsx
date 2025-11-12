@@ -1,73 +1,87 @@
 "use client"
 
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 import { Card } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export function InventorySummary() {
+const chartData = [
+  {
+    category: "inventory",
+    tersedia: 612,
+    dipinjam: 180,
+    perbaikan: 50,
+  },
+]
+
+const chartConfig = {
+  tersedia: {
+    label: "Tersedia",
+    color: "#10b981",
+  },
+  dipinjam: {
+    label: "Dipinjam",
+    color: "#f59e0b",
+  },
+  perbaikan: {
+    label: "Perbaikan",
+    color: "#ef4444",
+  },
+} satisfies ChartConfig
+
+export default function InventorySummary() {
   const total = 842
-  const available = 612 // ~72.7%
-  const borrowed = 180 // ~21.4%
-  const repair = 50 // ~5.9%
-
-  const availablePercent = (available / total) * 100
-  const borrowedPercent = (borrowed / total) * 100
-  const repairPercent = (repair / total) * 100
+  const available = 612
+  const borrowed = 180
+  const repair = 50
 
   return (
-    <Card className="p-6 bg-white">
+    <Card className="flex flex-col p-6 bg-white">
       <h3 className="mb-6 text-lg font-semibold text-gray-900">Ringkasan Inventaris</h3>
 
-      {/* Circular Progress */}
-      <div className="flex justify-center">
-        <div className="relative h-48 w-48">
-          <svg className="h-full w-full" viewBox="0 0 200 200">
-            {/* Background circle */}
-            <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" strokeWidth="12" />
-            {/* Available (Green) */}
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              fill="none"
-              stroke="#10b981"
-              strokeWidth="12"
-              strokeDasharray={`${(availablePercent / 100) * 565.48} 565.48`}
-              strokeLinecap="round"
-              transform="rotate(-90 100 100)"
+      <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[300px]">
+        <RadialBarChart data={chartData} endAngle={180} innerRadius={80} outerRadius={130}>
+          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+          <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
+                      <tspan x={viewBox.cx} y={(viewBox.cy || 0) - 16} className="fill-gray-900 text-2xl font-bold">
+                        {total}
+                      </tspan>
+                      <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 4} className="fill-gray-600 text-sm">
+                        Total
+                      </tspan>
+                    </text>
+                  )
+                }
+              }}
             />
-            {/* Borrowed (Yellow) */}
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              fill="none"
-              stroke="#f59e0b"
-              strokeWidth="12"
-              strokeDasharray={`${(borrowedPercent / 100) * 565.48} 565.48`}
-              strokeDashoffset={`-${(availablePercent / 100) * 565.48}`}
-              strokeLinecap="round"
-              transform="rotate(-90 100 100)"
-            />
-            {/* Repair (Red) */}
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              fill="none"
-              stroke="#ef4444"
-              strokeWidth="12"
-              strokeDasharray={`${(repairPercent / 100) * 565.48} 565.48`}
-              strokeDashoffset={`-${((availablePercent + borrowedPercent) / 100) * 565.48}`}
-              strokeLinecap="round"
-              transform="rotate(-90 100 100)"
-            />
-          </svg>
-          {/* Center text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="text-3xl font-bold text-gray-900">{total}</p>
-            <p className="text-sm text-gray-600">Total</p>
-          </div>
-        </div>
-      </div>
+          </PolarRadiusAxis>
+          <RadialBar
+            dataKey="tersedia"
+            stackId="a"
+            cornerRadius={5}
+            fill="#10b981"
+            className="stroke-transparent stroke-2"
+          />
+          <RadialBar
+            dataKey="dipinjam"
+            stackId="a"
+            cornerRadius={5}
+            fill="#f59e0b"
+            className="stroke-transparent stroke-2"
+          />
+          <RadialBar
+            dataKey="perbaikan"
+            stackId="a"
+            cornerRadius={5}
+            fill="#ef4444"
+            className="stroke-transparent stroke-2"
+          />
+        </RadialBarChart>
+      </ChartContainer>
 
       {/* Legend */}
       <div className="mt-6 space-y-2">
