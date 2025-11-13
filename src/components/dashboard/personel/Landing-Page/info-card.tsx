@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, ClipboardList, Calendar } from "lucide-react"
+import { Calendar, CheckCircle2, ClipboardList } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function InfoCards() {
   const cards = [
@@ -26,7 +26,7 @@ export function InfoCards() {
       icon: <Calendar className="w-12 h-12 text-blue-500" />,
       details: [{ label: "Rapat Koordinasi 10:00 WIB", value: "" }],
     },
-  ]
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -34,8 +34,14 @@ export function InfoCards() {
         <Card key={idx} className="border border-border">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
-              <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
-              {typeof card.icon === "string" ? <div className="text-4xl">{card.icon}</div> : <div>{card.icon}</div>}
+              <CardTitle className="text-lg font-semibold">
+                {card.title}
+              </CardTitle>
+              {typeof card.icon === "string" ? (
+                <div className="text-4xl">{card.icon}</div>
+              ) : (
+                <div>{card.icon}</div>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
@@ -44,7 +50,9 @@ export function InfoCards() {
                 {detail.value ? (
                   <>
                     <p className="text-muted-foreground">{detail.label}</p>
-                    <p className="font-medium text-foreground">{detail.value}</p>
+                    <p className="font-medium text-foreground">
+                      {detail.value}
+                    </p>
                   </>
                 ) : (
                   <p className="text-muted-foreground">{detail.label}</p>
@@ -55,5 +63,5 @@ export function InfoCards() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
