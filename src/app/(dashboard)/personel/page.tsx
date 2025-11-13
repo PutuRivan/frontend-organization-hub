@@ -1,6 +1,6 @@
-import { DashboardHeader } from "@/components/dashboard/personel/Landing-Page/dashboard-header"
-import { InfoCards } from "@/components/dashboard/personel/Landing-Page/info-card"
-import { ScheduleTable } from "@/components/dashboard/personel/Landing-Page/schedule-table"
+import { DashboardHeader } from "@/components/dashboard/personel/dashboard/dashboard-header"
+import { InfoCards } from "@/components/dashboard/personel/dashboard/info-card"
+import { ScheduleTable } from "@/components/dashboard/personel/dashboard/schedule-table"
 
 export default function Home() {
   return (

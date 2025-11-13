@@ -44,11 +44,6 @@ const data = {
       icon: Archive,
     },
     {
-      name: "laporan",
-      url: "laporan",
-      icon: FileText,
-    },
-    {
       name: "Jadwal Kegiatan",
       url: "jadwal-kegiatan",
       icon: Calendar,
@@ -62,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 🔹 Mapping akses berdasarkan role
   const roleAccess: Record<string, string[]> = {
     Admin: ["Dashboard", "Inventaris Barang", "Absensi", "Laporan", "Jadwal Kegiatan", "Manajemen Personel"],
-    Personel: ["Dashboard", "Absensi", "Jadwal Kegiatan"],
+    Personel: ["Dashboard", "Absensi", "Inventaris Barang", "Jadwal Kegiatan"],
   };
 
   const role = user?.role || "Personel";
