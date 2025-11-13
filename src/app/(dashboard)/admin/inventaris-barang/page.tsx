@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AddItemDialog } from "@/components/dashboard/admin/inventaris-barang/add-item-dialog";
 import { InventoryTable } from "@/components/dashboard/admin/inventaris-barang/inventory-table";
@@ -15,6 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { deleteInventoryAction } from "@/libs/action";
 import { getInventory } from "@/libs/apis";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 
@@ -36,7 +38,7 @@ export default function Page() {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  const pathname = usePathname();
   const itemsPerPage = 5; // nilai tetap
   const token = getAccessTokenFromCookie();
 
@@ -56,7 +58,7 @@ export default function Page() {
         setLoading(false);
       }
     },
-    [token] // hanya token yang bisa berubah
+    [token], // hanya token yang bisa berubah
   );
 
   // 🔹 Ambil data ketika page berubah
@@ -83,9 +85,7 @@ export default function Page() {
 
   const handleDeleteItem = async (id: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${id}`, {
-        method: "DELETE",
-      });
+      await deleteInventoryAction(pathname, token, id);
       fetchInventory(currentPage);
     } catch (error) {
       console.error(error);
@@ -94,7 +94,7 @@ export default function Page() {
 
   const handleEditItem = async (
     id: string,
-    updatedItem: Omit<InventoryItem, "id">
+    updatedItem: Omit<InventoryItem, "id">,
   ) => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${id}`, {
@@ -170,7 +170,10 @@ export default function Page() {
 
               {(() => {
                 const visiblePages = 5; // jumlah halaman yang ingin ditampilkan
-                let startPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
+                let startPage = Math.max(
+                  1,
+                  currentPage - Math.floor(visiblePages / 2),
+                );
                 let endPage = startPage + visiblePages - 1;
 
                 if (endPage > totalPages) {
@@ -178,22 +181,23 @@ export default function Page() {
                   startPage = Math.max(1, endPage - visiblePages + 1);
                 }
 
-                return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-                  (page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href="#"
-                        isActive={currentPage === page}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(page);
-                        }}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )
-                );
+                return Array.from(
+                  { length: endPage - startPage + 1 },
+                  (_, i) => startPage + i,
+                ).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === page}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(page);
+                      }}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ));
               })()}
 
               <PaginationItem>
