@@ -13,7 +13,6 @@ import {
 export default function HeaderBreadcrumb() {
   const pathname = usePathname()
 
-  // Pisahkan path menjadi array, lalu filter agar "admin" tidak muncul
   const segments = pathname
     .split("/")
     .filter(Boolean)
@@ -30,7 +29,7 @@ export default function HeaderBreadcrumb() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+          <BreadcrumbLink href={""}>Dashboard</BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {

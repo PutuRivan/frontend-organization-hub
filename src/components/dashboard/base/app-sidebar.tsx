@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, CalendarCheck, Command, FileText, Home } from "lucide-react";
+import { Archive, Calendar, CalendarCheck, Command, FileText, Home, UsersRound } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import {
@@ -29,9 +29,9 @@ const data = {
       icon: Home,
     },
     {
-      name: "Inventaris Barang",
-      url: "inventaris-barang",
-      icon: Archive,
+      name: "Manajemen Personel",
+      url: "manajemen-personel",
+      icon: UsersRound,
     },
     {
       name: "Absensi",
@@ -39,15 +39,38 @@ const data = {
       icon: CalendarCheck,
     },
     {
+      name: "Inventaris Barang",
+      url: "inventaris-barang",
+      icon: Archive,
+    },
+    {
       name: "laporan",
       url: "laporan",
       icon: FileText,
+    },
+    {
+      name: "Jadwal Kegiatan",
+      url: "jadwal-kegiatan",
+      icon: Calendar,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
+
+  // 🔹 Mapping akses berdasarkan role
+  const roleAccess: Record<string, string[]> = {
+    Admin: ["Dashboard", "Inventaris Barang", "Absensi", "Laporan", "Jadwal Kegiatan", "Manajemen Personel"],
+    Personel: ["Dashboard", "Absensi", "Jadwal Kegiatan"],
+  };
+
+  const role = user?.role || "Personel";
+
+  const filteredMenu = data.main.filter((item) =>
+    roleAccess[role]?.includes(item.name)
+  );
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -67,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <Navmain projects={data.main} role={user?.role} />
+        <Navmain projects={filteredMenu} role={user?.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

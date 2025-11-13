@@ -1,22 +1,23 @@
-"use client"
-  
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card } from "@/components/ui/card"
+"use client";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle, CheckCircle } from "lucide-react";
+
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle, AlertTriangle } from "lucide-react"
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 const formatAttendanceTime = (date: Date): string => {
   const options: Intl.DateTimeFormatOptions = {
@@ -26,74 +27,80 @@ const formatAttendanceTime = (date: Date): string => {
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }
-  
-  const formattedDate = date.toLocaleString("id-ID", options)
-  
-  return formattedDate.replace(",", ", ").replace(/:\d{2}/, "") + " WIB."
-}
+  };
+
+  const formattedDate = date.toLocaleString("id-ID", options);
+
+  return formattedDate.replace(",", ", ").replace(/:\d{2}/, "") + " WIB.";
+};
 
 export default function AttendanceForm() {
-  const [fullName, setFullName] = useState("Budi Santoso")
-  const [personnelId, setPersonnelId] = useState("USR-12345")
-  const [attendanceType, setAttendanceType] = useState("present")
-  const [remarks, setRemarks] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [dialogType, setDialogType] = useState<"success" | "duplicate">("success")
-  const [submitTime, setSubmitTime] = useState("")
+  const [fullName, setFullName] = useState("Budi Santoso");
+  const [personnelId, setPersonnelId] = useState("USR-12345");
+  const [attendanceType, setAttendanceType] = useState("present");
+  const [remarks, setRemarks] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"success" | "duplicate">(
+    "success",
+  );
+  const [submitTime, setSubmitTime] = useState("");
 
   const [submittedList, setSubmittedList] = useState<
-    { fullName: string; personnelId: string; attendanceType: string; remarks: string }[]
-  >([])
+    {
+      fullName: string;
+      personnelId: string;
+      attendanceType: string;
+      remarks: string;
+    }[]
+  >([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("attendanceRecords")
-    if (saved) setSubmittedList(JSON.parse(saved))
-  }, [])
+    const saved = localStorage.getItem("attendanceRecords");
+    if (saved) setSubmittedList(JSON.parse(saved));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     const isDuplicate = submittedList.some(
       (r) =>
         r.fullName === fullName &&
         r.personnelId === personnelId &&
         r.attendanceType === attendanceType &&
-        r.remarks === remarks
-    )
+        r.remarks === remarks,
+    );
 
     if (isDuplicate) {
-      setDialogType("duplicate")
-      setIsDialogOpen(true)
-      setIsSubmitting(false)
-      return
+      setDialogType("duplicate");
+      setIsDialogOpen(true);
+      setIsSubmitting(false);
+      return;
     }
 
     try {
-      const now = new Date()
-      const formattedTime = formatAttendanceTime(now) // Gunakan format waktu yang diminta
+      const now = new Date();
+      const formattedTime = formatAttendanceTime(now); // Gunakan format waktu yang diminta
 
-      const newRecord = { fullName, personnelId, attendanceType, remarks }
-      const updatedList = [...submittedList, newRecord]
-      localStorage.setItem("attendanceRecords", JSON.stringify(updatedList))
-      setSubmittedList(updatedList)
+      const newRecord = { fullName, personnelId, attendanceType, remarks };
+      const updatedList = [...submittedList, newRecord];
+      localStorage.setItem("attendanceRecords", JSON.stringify(updatedList));
+      setSubmittedList(updatedList);
 
-      setSubmitTime(formattedTime)
-      setDialogType("success")
-      setIsDialogOpen(true)
+      setSubmitTime(formattedTime);
+      setDialogType("success");
+      setIsDialogOpen(true);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const radioClass = (value: string) =>
-    `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition ${
-      attendanceType === value
-        ? "border-green-600 bg-green-50 shadow-md scale-[1.02]"
-        : "border-gray-200 hover:border-gray-300"
-    }`
+    `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition ${attendanceType === value
+      ? "border-green-600 bg-green-50 shadow-md scale-[1.02]"
+      : "border-gray-200 hover:border-gray-300"
+    }`;
 
   return (
     <>
@@ -127,18 +134,27 @@ export default function AttendanceForm() {
 
           <div className="space-y-3">
             <Label>Jenis Absensi</Label>
-            <RadioGroup value={attendanceType} onValueChange={setAttendanceType}>
+            <RadioGroup
+              value={attendanceType}
+              onValueChange={setAttendanceType}
+            >
               <div className="grid grid-cols-3 gap-4">
                 <div className={radioClass("present")}>
                   <RadioGroupItem value="present" id="present" />
-                  <Label htmlFor="present" className="cursor-pointer flex-1 m-0">
+                  <Label
+                    htmlFor="present"
+                    className="cursor-pointer flex-1 m-0"
+                  >
                     Hadir
                   </Label>
                 </div>
 
                 <div className={radioClass("permission")}>
                   <RadioGroupItem value="permission" id="permission" />
-                  <Label htmlFor="permission" className="cursor-pointer flex-1 m-0">
+                  <Label
+                    htmlFor="permission"
+                    className="cursor-pointer flex-1 m-0"
+                  >
                     Izin
                   </Label>
                 </div>
@@ -157,9 +173,8 @@ export default function AttendanceForm() {
           {attendanceType !== "present" && (
             <div className="space-y-2">
               <Label htmlFor="remarks">Keterangan</Label>
-              <Input
+              <Textarea
                 id="remarks"
-                type="text"
                 placeholder={`Masukkan alasan ${attendanceType === "permission" ? "izin" : "sakit"}`}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
@@ -184,18 +199,17 @@ export default function AttendanceForm() {
         {isDialogOpen && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             {/* Kunci lebar dan hapus padding default dari DialogContent */}
-            <DialogContent className="max-w-[300px] p-0 overflow-hidden rounded-xl border-none"> 
+            <DialogContent className="max-w-[300px] p-5 overflow-hidden rounded-xl border-none">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-center" 
+                className="text-center p-5"
               >
                 <DialogHeader className="p-4 pt-8 pb-6 text-center space-y-4">
                   {dialogType === "success" ? (
                     <>
-
                       <div className="mx-auto w-14 h-14 rounded-full bg-green-100/50 flex items-center justify-center mb-2">
                         <CheckCircle className="text-green-500 w-14 h-14 mb-2" />
                       </div>
@@ -210,38 +224,36 @@ export default function AttendanceForm() {
                     </>
                   ) : (
                     <>
-                
-                        <AlertTriangle className="mx-auto text-yellow-600 w-14 h-14 mb-2" />
-                        <DialogTitle className="text-yellow-700 text-2xl font-semibold text-center">
+                      <AlertTriangle className="mx-auto text-yellow-600 w-14 h-14 mb-2" />
+                      <DialogTitle className="text-yellow-700 text-2xl font-semibold text-center">
                         Anda Sudah Absen
-                        </DialogTitle>
-                        <DialogDescription className="text-gray-700 text-center">
-                        Data absensi dengan nama dan ID yang sama sudah tercatat sebelumnya.
-                        </DialogDescription>
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-700 text-center">
+                        Data absensi dengan nama dan ID yang sama sudah tercatat
+                        sebelumnya.
+                      </DialogDescription>
                     </>
                   )}
                 </DialogHeader>
-                 <DialogFooter className="flex justify-center !p-0 !justify-center w-full mt-4">
-                <Button
+                <DialogFooter className="flex py-3 w-full mt-4">
+                  <Button
                     onClick={() => setIsDialogOpen(false)}
                     className={`
                     w-[70%] h-12 rounded-lg text-base font-medium
-                    ${
-                        dialogType === "success"
+                    ${dialogType === "success"
                         ? "bg-blue-600 hover:bg-blue-700"
                         : "bg-yellow-600 hover:bg-yellow-700"
-                    } text-white
+                      } text-white
                     `}
-                >
+                  >
                     Tutup
-                </Button>
+                  </Button>
                 </DialogFooter>
-
               </motion.div>
             </DialogContent>
           </Dialog>
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }
