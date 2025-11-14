@@ -4,7 +4,6 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { AddItemDialog } from "@/components/dashboard/admin/inventaris-barang/add-item-dialog";
 import { InventoryTable } from "@/components/dashboard/admin/inventaris-barang/inventory-table";
 import SearchBar from "@/components/dashboard/admin/inventaris-barang/search-bar";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { deleteInventoryAction } from "@/libs/action";
 import { getInventory } from "@/libs/apis";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 
@@ -97,6 +95,8 @@ export default function Page() {
             items={items}
             pathname={pathname}
             token={token}
+            fetchInventory={fetchInventory}
+            page={currentPage}
           />
         )}
 

@@ -1,11 +1,8 @@
-
 import CreateInventarisForm from "@/components/dashboard/admin/inventaris-barang/create/create-inventaris-form";
 import { Card } from "@/components/ui/card";
 
 
 export default function page() {
-
-
   return (
     <section className="p-5">
       <h1 className="text-2xl font-bold">Add New Inventory Item</h1>

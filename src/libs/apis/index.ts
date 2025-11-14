@@ -32,6 +32,32 @@ export async function getInventory(
   return await res.json();
 }
 
+export async function getInventoryById(token: string, id: string) {
+  const parsedToken = JSON.parse(token);
+  const res = await fetch(`${API_URL}/inventory/${id}`, {
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+  });
+
+  return await res.json();
+}
+
+export async function updateInventory(token: string, id: string, formData: FormData) {
+  const parsedToken = JSON.parse(token)
+  const res = await fetch(`${API_URL}/inventory/${id}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: formData
+  })
+
+  return await res.json()
+}
+
 export async function deleteInventory(token: string, id: string) {
   const parsedToken = JSON.parse(token);
 

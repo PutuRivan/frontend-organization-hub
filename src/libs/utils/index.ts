@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import Cookies from "js-cookie";
-import { TUser } from "../types";
+import { twMerge } from "tailwind-merge";
+import type { TUser } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

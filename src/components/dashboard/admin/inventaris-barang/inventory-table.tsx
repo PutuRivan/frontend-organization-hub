@@ -1,5 +1,6 @@
 import { Edit2, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import type { InventoryItem } from "@/app/(dashboard)/admin/inventaris-barang/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteInventoryAction } from "@/libs/action";
-import Link from "next/link";
 
 interface InventoryTableProps {
   items: InventoryItem[];
-  pathname: string
-  token: string
+  pathname: string;
+  token: string;
+  page: number
+  fetchInventory: (page: number) => void
 }
 
 const getCategoryColor = (category: string) => {
@@ -37,11 +39,13 @@ export function InventoryTable({
   items,
   pathname,
   token,
+  page,
+  fetchInventory
 }: InventoryTableProps) {
-
   const handleDeleteItem = async (id: string) => {
     try {
-      await deleteInventoryAction(pathname, token, id);
+      const status = await deleteInventoryAction(pathname, token, id);
+      if (status.success) fetchInventory(page)
     } catch (error) {
       console.error(error);
     }
@@ -72,9 +76,7 @@ export function InventoryTable({
                   {item.image ? (
                     <div className="relative h-14 w-14 rounded-md overflow-hidden">
                       <Image
-                        src={
-                          `${process.env.NEXT_PUBLIC_API_URL}${item.image}`
-                        }
+                        src={`${process.env.NEXT_PUBLIC_API_URL}${item.image}`}
                         alt={item.item_name}
                         fill
                         className="object-cover"
@@ -101,11 +103,8 @@ export function InventoryTable({
 
                 <TableCell className="text-center">
                   <div className="flex justify-center gap-2">
-                    <Link href={""}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                      >
+                    <Link href={`/admin/inventaris-barang/update/${item.id}`}>
+                      <Button variant="ghost" size="icon">
                         <Edit2 className="h-4 w-4" />
                       </Button>
                     </Link>
