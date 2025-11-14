@@ -5,3 +5,11 @@ export type TUser = {
   image: string;
   role: string;
 };
+
+export type TTokenCheckResponse = {
+  dataToken: {
+    ID_User: string;
+    role: string;
+  };
+  message?: string;
+};
