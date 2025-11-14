@@ -9,9 +9,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { useAuth } from "@/context/auth-context"
 
 export default function HeaderBreadcrumb() {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   const segments = pathname
     .split("/")
@@ -29,7 +31,7 @@ export default function HeaderBreadcrumb() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink href={""}>Dashboard</BreadcrumbLink>
+          <BreadcrumbLink href={`/${user?.role.toLowerCase()}`}>Dashboard</BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {
@@ -44,7 +46,7 @@ export default function HeaderBreadcrumb() {
                 {isLast ? (
                   <BreadcrumbPage>{label}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                  <BreadcrumbLink href={`/${user?.role.toLowerCase()}${href}`}>{label}</BreadcrumbLink>
                 )}
               </BreadcrumbItem>
             </div>

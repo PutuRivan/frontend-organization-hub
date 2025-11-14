@@ -11,28 +11,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteInventoryAction } from "@/libs/action";
+import Link from "next/link";
 
 interface InventoryTableProps {
   items: InventoryItem[];
-  onDelete: (id: string) => void;
-  onEdit: (id: string, item: Omit<InventoryItem, "id">) => void;
+  pathname: string
+  token: string
 }
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case "Baik":
+      return "bg-green-100 text-green-800";
+    case "Rusak Ringan":
+      return "bg-yellow-100 text-yellow-800";
+    case "Rusak":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 export function InventoryTable({
   items,
-  onDelete,
-  onEdit,
+  pathname,
+  token,
 }: InventoryTableProps) {
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "Baik":
-        return "bg-green-100 text-green-800";
-      case "Rusak Ringan":
-        return "bg-yellow-100 text-yellow-800";
-      case "Rusak":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await deleteInventoryAction(pathname, token, id);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -90,30 +101,20 @@ export function InventoryTable({
 
                 <TableCell className="text-center">
                   <div className="flex justify-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() =>
-                        onEdit(item.id, {
-                          item_name: item.item_name,
-                          quantity: item.quantity,
-                          quantity_description: item.quantity_description,
-                          category: item.category,
-                          location: item.location,
-                          description: item.description,
-                          image: item.image,
-                        })
-                      }
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
+                    <Link href={""}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                    </Link>
 
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      onClick={() => onDelete(item.id)}
+                      size="icon"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteItem(item.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

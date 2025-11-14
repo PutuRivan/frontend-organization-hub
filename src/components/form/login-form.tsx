@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,8 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TUserLoginSchema, userLoginSchema } from "@/libs/schema";
 import { useAuth } from "@/context/auth-context";
+import { type TUserLoginSchema, userLoginSchema } from "@/libs/schema";
 import { Spinner } from "../ui/spinner";
 
 export default function LoginForm() {
@@ -26,10 +26,10 @@ export default function LoginForm() {
       password: "",
     },
   });
-  const { login, loading } = useAuth()
+  const { login, loading } = useAuth();
 
   async function onSubmit(values: TUserLoginSchema) {
-    login({ email: values.email, password: values.password })
+    login({ email: values.email, password: values.password });
   }
 
   return (
@@ -72,11 +72,7 @@ export default function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button
-              className="w-full"
-              type="submit"
-              disabled={loading}
-            >
+            <Button className="w-full" type="submit" disabled={loading}>
               {loading ? <Spinner /> : "Submit"}
             </Button>
           </form>

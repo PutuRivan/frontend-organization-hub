@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AddItemDialog } from "@/components/dashboard/admin/inventaris-barang/add-item-dialog";
@@ -10,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -33,7 +33,6 @@ export interface InventoryItem {
 
 export default function Page() {
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,7 +41,6 @@ export default function Page() {
   const itemsPerPage = 5; // nilai tetap
   const token = getAccessTokenFromCookie();
 
-  // ✅ Hapus itemsPerPage dari dependency karena nilainya tidak berubah
   const fetchInventory = useCallback(
     async (page: number) => {
       try {
@@ -58,55 +56,12 @@ export default function Page() {
         setLoading(false);
       }
     },
-    [token], // hanya token yang bisa berubah
+    [token],
   );
 
-  // 🔹 Ambil data ketika page berubah
   useEffect(() => {
     fetchInventory(currentPage);
   }, [fetchInventory, currentPage]);
-
-  const handleAddItem = async (newItem: Omit<InventoryItem, "id">) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inventory`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newItem),
-      });
-
-      if (!res.ok) throw new Error("Gagal menambah barang");
-
-      fetchInventory(currentPage);
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDeleteItem = async (id: string) => {
-    try {
-      await deleteInventoryAction(pathname, token, id);
-      fetchInventory(currentPage);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleEditItem = async (
-    id: string,
-    updatedItem: Omit<InventoryItem, "id">,
-  ) => {
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/inventory/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedItem),
-      });
-      fetchInventory(currentPage);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -122,13 +77,14 @@ export default function Page() {
         {/* Search & Add */}
         <div className="mb-6 flex justify-between">
           <SearchBar />
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="gap-2 bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Barang
-          </Button>
+          <Link href={"inventaris-barang/create"}>
+            <Button
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Barang
+            </Button>
+          </Link>
         </div>
 
         {/* Table */}
@@ -139,8 +95,8 @@ export default function Page() {
         ) : (
           <InventoryTable
             items={items}
-            onDelete={handleDeleteItem}
-            onEdit={handleEditItem}
+            pathname={pathname}
+            token={token}
           />
         )}
 
@@ -218,13 +174,6 @@ export default function Page() {
           </Pagination>
         </div>
       </div>
-
-      {/* Dialog Add Item */}
-      <AddItemDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onAddItem={handleAddItem}
-      />
     </main>
   );
 }
