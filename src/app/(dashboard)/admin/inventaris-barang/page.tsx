@@ -75,7 +75,7 @@ export default function Page() {
         {/* Search & Add */}
         <div className="mb-6 flex justify-between">
           <SearchBar />
-          <Link href={"inventaris-barang/create"}>
+          <Link href={"inventaris-barang/tambah-barang"}>
             <Button
               className="gap-2 bg-blue-600 hover:bg-blue-700"
             >

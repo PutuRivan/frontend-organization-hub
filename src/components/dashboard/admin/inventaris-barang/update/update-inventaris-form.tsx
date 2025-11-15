@@ -28,7 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { createInventory, type TCreateInventory } from "@/libs/schema";
 import type { TInventory } from "@/libs/types";
-import ImagePreview from "../create/image-preview";
+import ImagePreview from "../tambah-barang/image-preview";
 
 interface UpdateInventarisForm {
   data: TInventory;
