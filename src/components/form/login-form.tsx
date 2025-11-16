@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import z from "zod/v3";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/auth-context";
 import { type TUserLoginSchema, userLoginSchema } from "@/libs/schema";
 import { Spinner } from "../ui/spinner";
+import { Mail, Lock } from "lucide-react";
 
 export default function LoginForm() {
   const form = useForm<TUserLoginSchema>({
@@ -26,22 +26,27 @@ export default function LoginForm() {
       password: "",
     },
   });
+
   const { login, loading } = useAuth();
 
   async function onSubmit(values: TUserLoginSchema) {
     login({ email: values.email, password: values.password });
   }
 
-  return (
-    <Card className="w-[400px]">
+ return (
+  <div className="flex items-center justify-center min-h-screen bg-white px-4">
+    <Card className="w-[480px] shadow-xl border border-gray-200 rounded-3x1 p-9">
       <CardHeader>
-        <CardTitle className="text-center text-2xl">
-          Login to your account
+        <CardTitle className="text-center text-3xl font-semibold">
+          Login
         </CardTitle>
       </CardHeader>
+
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* EMAIL */}
             <FormField
               control={form.control}
               name="email"
@@ -49,16 +54,22 @@ export default function LoginForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="john@example.com"
-                      type="email"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+                      <Input
+                        placeholder="Enter your email"
+                        type="email"
+                        className="pl-10 h-12 text-base"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* PASSWORD */}
             <FormField
               control={form.control}
               name="password"
@@ -66,18 +77,29 @@ export default function LoginForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" type="password" {...field} />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+                      <Input
+                        placeholder="Enter your password"
+                        type="password"
+                        className="pl-10 h-12 text-base"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? <Spinner /> : "Submit"}
+
+            {/* BUTTON */}
+            <Button className="w-full h-12 text-base" type="submit" disabled={loading}>
+              {loading ? <Spinner /> : "Log In"}
             </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
-  );
+  </div>
+);
 }
