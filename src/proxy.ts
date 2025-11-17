@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { toast } from "sonner";
 import { CheckToken } from "./libs/apis";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("access_token")?.value || "null";
   const dashboardPagePrefix = ["/admin", "/personel"];
@@ -35,14 +35,14 @@ export async function middleware(request: NextRequest) {
           userRole === "Admin"
         ) {
           return NextResponse.redirect(new URL("/admin", request.nextUrl));
-        } 
+        }
 
         if (
           request.nextUrl.pathname.startsWith("/admin") &&
           userRole === "Personel"
         ) {
           return NextResponse.redirect(new URL("/personel", request.nextUrl));
-        } 
+        }
 
       }
 

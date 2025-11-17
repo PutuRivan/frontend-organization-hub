@@ -61,8 +61,8 @@ export async function createNewInventory(token: string, formData: FormData) {
 export async function updateInventory(token: string, id: string, formData: FormData) {
   const parsedToken = JSON.parse(token)
   const res = await fetch(`${API_URL}/inventory/${id}`, {
+    method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${parsedToken}`,
     },
     body: formData
