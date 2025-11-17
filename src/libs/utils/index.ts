@@ -22,15 +22,15 @@ export function removeAccessTokenFromCookie() {
 }
 
 export function setUserDataInSessionStorage(user: TUser) {
-  sessionStorage.setItem("user_data", JSON.stringify(user));
+  localStorage.setItem("user_data", JSON.stringify(user));
 }
 
 export function getUserDataFromSessionStorage(): TUser | null {
-  const user = sessionStorage.getItem("user_data");
+  const user = localStorage.getItem("user_data");
 
   return user ? JSON.parse(user) : null;
 }
 
 export function removeUserDataFromSessionStorage() {
-  sessionStorage.removeItem("user_data");
+  localStorage.removeItem("user_data");
 }

@@ -23,6 +23,8 @@ export async function proxy(request: NextRequest) {
         request.nextUrl.pathname.startsWith("/personel")
       )
     ) {
+      localStorage.removeItem("user_data");
+      localStorage.removeItem("access_token");
       return NextResponse.redirect(new URL("/", request.nextUrl));
     }
 
@@ -57,7 +59,7 @@ export async function proxy(request: NextRequest) {
       }
     }
   } catch (error) {
-    toast.error("An error occurred while trying to change route.");
+    console.error("An error occurred while trying to change route.");
   }
 
   return NextResponse.next();

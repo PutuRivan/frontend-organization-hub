@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AuthContext } from "@/context/auth-context";
@@ -10,9 +11,8 @@ import {
   removeAccessTokenFromCookie,
   removeUserDataFromSessionStorage,
   setAccessTokenInCookie,
-  setUserDataInSessionStorage
+  setUserDataInSessionStorage,
 } from "@/libs/utils";
-import { useRouter } from "next/navigation";
 
 export default function AuthProviders({
   children,
@@ -21,10 +21,20 @@ export default function AuthProviders({
 }) {
   const [user, setUser] = useState<TUser | null>(null);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [token, setToken] = useState<string>("")
-  const [loading, setLoading] = useState<boolean>(false)
+  const [token, setToken] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = getUserDataFromSessionStorage();
+    const storedToken = getAccessTokenFromCookie();
+
+    if (storedUser && storedToken) {
+      setUser(storedUser);
+      setAuthenticated(true);
+    }
+  }, []);
 
   const login = async ({
     email,
@@ -34,66 +44,55 @@ export default function AuthProviders({
     password: string;
   }) => {
     try {
-      setLoading(true)
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
         toast.error("Email atau password salah");
-        setLoading(false)
+        setLoading(false);
         return;
       }
 
       const { token, data: userData } = data;
 
       setAccessTokenInCookie(token);
-      setUserDataInSessionStorage(userData)
+      setUserDataInSessionStorage(userData);
       setUser(data.data);
-      setToken(token)
+      setToken(token);
       setAuthenticated(true);
-      setLoading(false)
+      setLoading(false);
 
-      userData.role === 'Admin' ? router.push('/admin') : router.push('/personel');
+      userData.role === "Admin"
+        ? router.push("/admin")
+        : router.push("/personel");
       toast.success(`Selamat datang, ${userData.name}!`);
-
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   const logout = () => {
-    removeAccessTokenFromCookie()
-    removeUserDataFromSessionStorage()
+    removeAccessTokenFromCookie();
+    removeUserDataFromSessionStorage();
     setUser(null);
     setAuthenticated(false);
-    setToken("")
+    setToken("");
     toast.success("Berhasil logout");
-    router.push('/')
+    router.push("/");
   };
 
-  useEffect(() => {
-    const storedUser = getUserDataFromSessionStorage()
-    const storedToken = getAccessTokenFromCookie();
-
-    if (storedUser && storedToken) {
-      setUser(storedUser);
-      setAuthenticated(true);
-    }
-  }, []);
-
-
   return (
-    <AuthContext.Provider value={{ user, token, loading, authenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, authenticated, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
