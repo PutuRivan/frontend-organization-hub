@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { InventoryTable } from "@/components/dashboard/admin/inventaris-barang/inventory-table";
 import SearchBar from "@/components/dashboard/admin/inventaris-barang/search-bar";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export interface InventoryItem {
 
 export default function Page() {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -63,6 +64,15 @@ export default function Page() {
     fetchInventory(currentPage);
   }, [fetchInventory, currentPage]);
 
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) return items;
+
+    const normalizedQuery = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      item.item_name.toLowerCase().includes(normalizedQuery),
+    );
+  }, [items, searchTerm]);
+
   return (
     <main className="min-h-screen bg-background">
       <div className="px-5">
@@ -76,7 +86,7 @@ export default function Page() {
 
         {/* Search & Add */}
         <div className="mb-6 flex justify-between">
-          <SearchBar />
+          <SearchBar value={searchTerm} onChange={setSearchTerm} />
           <Link href={"inventaris-barang/create"}>
             <Button
               className="gap-2 bg-blue-600 hover:bg-blue-700"
@@ -94,7 +104,7 @@ export default function Page() {
           </p>
         ) : (
           <InventoryTable
-            items={items}
+            items={filteredItems}
             pathname={pathname}
             token={token}
             fetchInventory={fetchInventory}
@@ -105,9 +115,9 @@ export default function Page() {
         {/* Pagination Info */}
         <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-sm text-muted-foreground w-full">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{" "}
-            items
+            {searchTerm.trim()
+              ? `${filteredItems.length} hasil ditemukan`
+              : `Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems} items`}
           </p>
 
           {/* Pagination */}
