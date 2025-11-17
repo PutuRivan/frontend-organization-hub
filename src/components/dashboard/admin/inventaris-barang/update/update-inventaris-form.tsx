@@ -35,6 +35,7 @@ import type { TInventory } from "@/libs/types";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 import ImagePreview from "../create/image-preview";
 import DbImagePreview from "./db-image-preview";
+import { useRouter } from "next/navigation";
 
 interface UpdateInventarisForm {
   data: TInventory;
@@ -42,6 +43,7 @@ interface UpdateInventarisForm {
 
 export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
   const [files, setFiles] = useState<File[]>([]);
+  const router = useRouter();
   const { user } = useAuth();
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [isDbImageRemoved, setIsDbImageRemoved] = useState(false);
@@ -87,8 +89,6 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
   };
 
   const onSubmit = async (values: TCreateInventory) => {
-    console.log(values);
-
     if (!user?.id) return;
 
     setIsLoading(true);
@@ -119,6 +119,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
 
       toast.success("Item berhasil diupdate");
       form.reset();
+      router.push("/admin/inventaris-barang");
     } catch (error) {
       toast.error("Terjadi kesalahan saat submit");
       console.error(error);

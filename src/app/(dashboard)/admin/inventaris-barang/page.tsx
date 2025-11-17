@@ -21,12 +21,14 @@ import { getAccessTokenFromCookie } from "@/libs/utils";
 export interface InventoryItem {
   id: string;
   item_name: string;
+  item_code?: string;
   quantity: number;
   quantity_description: string;
   category: string;
   location: string;
   description: string;
   image: string;
+  updated_at?: string;
 }
 
 export default function Page() {
@@ -36,7 +38,7 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
-  const itemsPerPage = 5; // nilai tetap
+  const itemsPerPage = 10; // nilai tetap
   const token = getAccessTokenFromCookie();
 
   const fetchInventory = useCallback(
