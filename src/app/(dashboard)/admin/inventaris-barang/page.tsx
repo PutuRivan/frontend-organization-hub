@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { InventoryTable } from "@/components/dashboard/admin/inventaris-barang/inventory-table";
 import SearchBar from "@/components/dashboard/admin/inventaris-barang/search-bar";
 import { Button } from "@/components/ui/button";
@@ -21,22 +21,25 @@ import { getAccessTokenFromCookie } from "@/libs/utils";
 export interface InventoryItem {
   id: string;
   item_name: string;
+  item_code?: string;
   quantity: number;
   quantity_description: string;
   category: string;
   location: string;
   description: string;
   image: string;
+  updated_at?: string;
 }
 
 export default function Page() {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
-  const itemsPerPage = 5; // nilai tetap
+  const itemsPerPage = 10; // nilai tetap
   const token = getAccessTokenFromCookie();
 
   const fetchInventory = useCallback(
@@ -61,6 +64,15 @@ export default function Page() {
     fetchInventory(currentPage);
   }, [fetchInventory, currentPage]);
 
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) return items;
+
+    const normalizedQuery = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      item.item_name.toLowerCase().includes(normalizedQuery),
+    );
+  }, [items, searchTerm]);
+
   return (
     <main className="min-h-screen bg-background">
       <div className="px-5">
@@ -74,8 +86,8 @@ export default function Page() {
 
         {/* Search & Add */}
         <div className="mb-6 flex justify-between">
-          <SearchBar />
-          <Link href={"inventaris-barang/tambah-barang"}>
+          <SearchBar value={searchTerm} onChange={setSearchTerm} />
+          <Link href={"inventaris-barang/create"}>
             <Button
               className="gap-2 bg-blue-600 hover:bg-blue-700"
             >
@@ -92,7 +104,7 @@ export default function Page() {
           </p>
         ) : (
           <InventoryTable
-            items={items}
+            items={filteredItems}
             pathname={pathname}
             token={token}
             fetchInventory={fetchInventory}
@@ -103,9 +115,9 @@ export default function Page() {
         {/* Pagination Info */}
         <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-sm text-muted-foreground w-full">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{" "}
-            items
+            {searchTerm.trim()
+              ? `${filteredItems.length} hasil ditemukan`
+              : `Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems} items`}
           </p>
 
           {/* Pagination */}
