@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ import ImagePreview from "./image-preview";
 export default function CreateInventarisForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const token = getAccessTokenFromCookie();
 
@@ -77,6 +79,8 @@ export default function CreateInventarisForm() {
 
     if (!user?.id) return;
 
+    setIsLoading(true);
+
     const formData = new FormData();
     formData.append("name", values.name);
     formData.append("quantity", values.quantity.toString());
@@ -96,13 +100,18 @@ export default function CreateInventarisForm() {
 
       if (!data.success) {
         toast.error(data.message);
+        return;
       }
 
       toast.success("Item berhasil ditambahkan");
-      form.reset()
+      form.reset();
+      setFiles([]);
+      setFilePreviews([]);
     } catch (error) {
       toast.error("Terjadi kesalahan saat submit");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -236,8 +245,19 @@ export default function CreateInventarisForm() {
         />
 
         <div className="flex justify-end gap-5">
-          <Button variant={"outline"}>Cancel</Button>
-          <Button type="submit">Submit</Button>
+          <Button variant={"outline"} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </div>
       </form>
     </Form>
