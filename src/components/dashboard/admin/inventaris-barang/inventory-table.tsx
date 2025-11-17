@@ -74,16 +74,16 @@ export function InventoryTable({
               >
                 <TableCell>
                   {item.image ? (
-                    <div className="relative h-14 w-14 rounded-md overflow-hidden">
+                    <div className="relative h-14 w-14 rounded-md overflow-hidden mx-auto">
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_API_URL}${item.image}`}
+                        src={`${item.image}`}
                         alt={item.item_name}
                         fill
-                        className="object-cover"
+                        className="object-cover object-center"
                       />
                     </div>
                   ) : (
-                    <div className="h-14 w-14 bg-gray-100 rounded-md" />
+                    <div className="h-14 w-14 bg-gray-100 rounded-md mx-auto" />
                   )}
                 </TableCell>
 
