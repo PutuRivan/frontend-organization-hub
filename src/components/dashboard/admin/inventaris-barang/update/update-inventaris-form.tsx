@@ -1,8 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,9 +28,14 @@ import {
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/auth-context";
+import { updateInventory } from "@/libs/apis";
 import { createInventory, type TCreateInventory } from "@/libs/schema";
 import type { TInventory } from "@/libs/types";
-import ImagePreview from "../tambah-barang/image-preview";
+
+import { getAccessTokenFromCookie } from "@/libs/utils";
+import ImagePreview from "../create/image-preview";
+import DbImagePreview from "./db-image-preview";
 
 interface UpdateInventarisForm {
   data: TInventory;
@@ -36,7 +43,11 @@ interface UpdateInventarisForm {
 
 export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
   const [files, setFiles] = useState<File[]>([]);
+  const { user } = useAuth();
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [isDbImageRemoved, setIsDbImageRemoved] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const token = getAccessTokenFromCookie();
   const form = useForm<TCreateInventory>({
     resolver: zodResolver(createInventory),
     defaultValues: {
@@ -69,8 +80,52 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
     form.setValue("image", updatedFiles);
   };
 
+  // Hapus gambar dari database
+  const handleRemoveDbImage = () => {
+    setIsDbImageRemoved(true);
+    // Reset form image field untuk memastikan gambar database tidak terkirim
+    form.setValue("image", []);
+  };
+
   const onSubmit = async (values: TCreateInventory) => {
     console.log(values);
+
+    if (!user?.id) return;
+
+    setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append("name", values.name ?? data.item_name);
+    formData.append("quantity", values.quantity.toString() ?? data.quantity);
+    formData.append(
+      "quantity_description",
+      values.quantity_description ?? data.quantity_description,
+    );
+    formData.append("category", values.category ?? data.category);
+    formData.append("location", values.location ?? data.location);
+    formData.append("description", values.description ?? data.description);
+
+    files.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    formData.append("userId", user.id);
+    try {
+      const response = await updateInventory(token, data.id, formData);
+
+      if (!response.success) {
+        toast.error(response.message);
+        return;
+      }
+
+      toast.success("Item berhasil diupdate");
+      form.reset();
+    } catch (error) {
+      toast.error("Terjadi kesalahan saat submit");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <Form {...form}>
@@ -172,23 +227,35 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
               <FormLabel>Gambar</FormLabel>
               <FormControl>
                 <div className="w-full">
-                  <Dropzone
-                    maxFiles={5}
-                    accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
-                    onDrop={(files) => {
-                      handleDrop(files);
-                      field.onChange(files); // update react-hook-form
-                    }}
-                  >
-                    <DropzoneEmptyState />
-                    <DropzoneContent />
-                  </Dropzone>
+                  {/* Jika ada image dari database dan belum dihapus → tampilkan dan tidak render dropzone */}
+                  {data.image && !isDbImageRemoved ? (
+                    <DbImagePreview
+                      filePreviews={data.image}
+                      onRemove={handleRemoveDbImage}
+                    />
+                  ) : (
+                    <>
+                      {/* Jika tidak ada image di DB atau user sudah hapus → tampilkan dropzone */}
+                      <Dropzone
+                        maxFiles={5}
+                        accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
+                        onDrop={(files) => {
+                          handleDrop(files);
+                          field.onChange(files);
+                        }}
+                      >
+                        <DropzoneEmptyState />
+                        <DropzoneContent />
+                      </Dropzone>
+                    </>
+                  )}
+
+                  {/* Preview gambar yang diupload user */}
                   {filePreviews.length > 0 && (
                     <ImagePreview
                       filePreviews={filePreviews}
                       onRemove={(index) => {
                         handleRemoveImage(index);
-                        // update form value juga
                         const newFiles = files.filter((_, i) => i !== index);
                         field.onChange(newFiles);
                       }}
@@ -201,8 +268,19 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
         />
 
         <div className="flex justify-end gap-5">
-          <Button variant={"outline"}>Cancel</Button>
-          <Button type="submit">Submit</Button>
+          <Button variant={"outline"} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </div>
       </form>
     </Form>

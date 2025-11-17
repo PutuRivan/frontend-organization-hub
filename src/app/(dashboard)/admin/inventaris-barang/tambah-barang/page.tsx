@@ -1,4 +1,4 @@
-import CreateInventarisForm from "@/components/dashboard/admin/inventaris-barang/tambah-barang/create-inventaris-form";
+import CreateInventarisForm from "@/components/dashboard/admin/inventaris-barang/create/create-inventaris-form";
 import { Card } from "@/components/ui/card";
 
 export default function page() {

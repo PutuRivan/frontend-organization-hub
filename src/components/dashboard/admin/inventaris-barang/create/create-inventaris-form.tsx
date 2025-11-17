@@ -1,8 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,7 +20,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -27,12 +29,19 @@ import {
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/auth-context";
+import { createNewInventory } from "@/libs/apis";
 import { createInventory, type TCreateInventory } from "@/libs/schema";
+import { getAccessTokenFromCookie } from "@/libs/utils";
 import ImagePreview from "./image-preview";
 
 export default function CreateInventarisForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const token = getAccessTokenFromCookie();
+
   const form = useForm<TCreateInventory>({
     resolver: zodResolver(createInventory),
     defaultValues: {
@@ -67,6 +76,43 @@ export default function CreateInventarisForm() {
 
   const onSubmit = async (values: TCreateInventory) => {
     console.log(values);
+
+    if (!user?.id) return;
+
+    setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("quantity", values.quantity.toString());
+    formData.append("quantity_description", values.quantity_description);
+    formData.append("category", values.category);
+    formData.append("location", values.location);
+    formData.append("description", values.description ?? "");
+
+    files.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    formData.append("userId", user.id);
+
+    try {
+      const data = await createNewInventory(token, formData);
+
+      if (!data.success) {
+        toast.error(data.message);
+        return;
+      }
+
+      toast.success("Item berhasil ditambahkan");
+      form.reset();
+      setFiles([]);
+      setFilePreviews([]);
+    } catch (error) {
+      toast.error("Terjadi kesalahan saat submit");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <Form {...form}>
@@ -93,6 +139,7 @@ export default function CreateInventarisForm() {
                 <FormControl>
                   <Input placeholder="quantity" type="number" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -101,12 +148,11 @@ export default function CreateInventarisForm() {
             name="quantity_description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Quantity Description
-                </FormLabel>
+                <FormLabel>Quantity Description</FormLabel>
                 <FormControl>
                   <Input placeholder="pcs" type="text" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -115,26 +161,22 @@ export default function CreateInventarisForm() {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Category
-                </FormLabel>
+                <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="baik">Baik</SelectItem>
-                        <SelectItem value="rusak">Rusak</SelectItem>
-                        <SelectItem value="hilang">Hilang</SelectItem>
+                        <SelectItem value="Baik">Baik</SelectItem>
+                        <SelectItem value="Rusak">Rusak</SelectItem>
+                        <SelectItem value="Hilang">Hilang</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -143,12 +185,11 @@ export default function CreateInventarisForm() {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Location
-                </FormLabel>
+                <FormLabel>Location</FormLabel>
                 <FormControl>
                   <Input placeholder="Lantai 7" type="text" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -158,12 +199,11 @@ export default function CreateInventarisForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Description (Optional)
-              </FormLabel>
+              <FormLabel>Description (Optional)</FormLabel>
               <FormControl>
                 <Textarea placeholder="optional" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -172,9 +212,7 @@ export default function CreateInventarisForm() {
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Gambar
-              </FormLabel>
+              <FormLabel>Gambar</FormLabel>
               <FormControl>
                 <div className="w-full">
                   <Dropzone
@@ -201,13 +239,25 @@ export default function CreateInventarisForm() {
                   )}
                 </div>
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
 
         <div className="flex justify-end gap-5">
-          <Button variant={"outline"}>Cancel</Button>
-          <Button type="submit">Submit</Button>
+          <Button variant={"outline"} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </div>
       </form>
     </Form>

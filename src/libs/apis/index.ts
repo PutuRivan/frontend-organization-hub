@@ -45,11 +45,24 @@ export async function getInventoryById(token: string, id: string) {
   return await res.json();
 }
 
+export async function createNewInventory(token: string, formData: FormData) {
+  const parsedToken = JSON.parse(token)
+  console.log(parsedToken)
+  const res = await fetch(`${API_URL}/inventory`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: formData,
+  })
+  return await res.json()
+}
+
 export async function updateInventory(token: string, id: string, formData: FormData) {
   const parsedToken = JSON.parse(token)
   const res = await fetch(`${API_URL}/inventory/${id}`, {
+    method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${parsedToken}`,
     },
     body: formData
