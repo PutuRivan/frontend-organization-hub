@@ -32,6 +32,7 @@ import { useAuth } from "@/context/auth-context";
 import { updateInventory } from "@/libs/apis";
 import { createInventory, type TCreateInventory } from "@/libs/schema";
 import type { TInventory } from "@/libs/types";
+
 import { getAccessTokenFromCookie } from "@/libs/utils";
 import ImagePreview from "../create/image-preview";
 import DbImagePreview from "./db-image-preview";
