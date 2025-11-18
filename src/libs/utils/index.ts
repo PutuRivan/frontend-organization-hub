@@ -34,3 +34,16 @@ export function getUserDataFromSessionStorage(): TUser | null {
 export function removeUserDataFromSessionStorage() {
   localStorage.removeItem("user_data");
 }
+
+export function getInventoryCategory(category: string) {
+  switch (category) {
+    case "Baik":
+      return "bg-green-100 text-green-800";
+    case "Rusak Ringan":
+      return "bg-yellow-100 text-yellow-800";
+    case "Rusak":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
