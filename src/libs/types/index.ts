@@ -4,7 +4,24 @@ export type TUser = {
   email: string;
   image: string;
   role: string;
+  position: string
+  created_at: string
+  update_at: string
 };
+
+export type TAttendanceStatus = "Hadir" | "Izin" | "Alfa" | "Sakit";
+
+export type TAttandance = {
+  id: string
+  date: string;
+  time_in: string | null;
+  time_out: string | null;
+  status: TAttandance
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  user: TUser
+}
 
 export type TItemCondition = "Baik" | "Rusak" | "Hilang";
 
