@@ -58,50 +58,47 @@ export default function Page() {
   }, [items, searchTerm]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="px-5">
-        <HeaderContent
-          title="Daftar Barang"
-          description="Kelola dan Pantau semua Item inventasis di satu tempat."
-        />
-
-        {/* Search & Add */}
-        <div className="mb-6 flex justify-between">
-          <SearchBar value={searchTerm} onChange={setSearchTerm} />
-          <Link href={"inventaris-barang/create"}>
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4" />
-              Tambah Barang
-            </Button>
-          </Link>
-        </div>
-
-        {/* Table */}
-        {loading ? (
-          <p className="text-center text-muted-foreground py-10">
-            Memuat data...
-          </p>
-        ) : (
-          <InventoryTable
-            items={filteredItems}
-            pathname={pathname}
-            token={token}
-            fetchInventory={fetchInventory}
-            page={currentPage}
-          />
-        )}
-
-        {/* Pagination Info */}
-        <InventoryPagination
-          currentPage={currentPage}
-          filteredItems={filteredItems}
-          itemsPerPage={itemsPerPage}
-          searchTerm={searchTerm}
-          setCurrentPage={setCurrentPage}
-          totalItems={totalItems}
-          totalPages={totalPages}
-        />
+    <main className="min-h-screen bg-background px-5">
+      <HeaderContent
+        title="Daftar Barang"
+        description="Kelola dan Pantau semua Item inventasis di satu tempat."
+      />
+      {/* Search & Add */}
+      <div className="mb-6 flex justify-between">
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <Link href={"inventaris-barang/create"}>
+          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4" />
+            Tambah Barang
+          </Button>
+        </Link>
       </div>
+
+      {/* Table */}
+      {loading ? (
+        <p className="text-center text-muted-foreground py-10">
+          Memuat data...
+        </p>
+      ) : (
+        <InventoryTable
+          items={filteredItems}
+          pathname={pathname}
+          token={token}
+          fetchInventory={fetchInventory}
+          page={currentPage}
+        />
+      )}
+
+      {/* Pagination Info */}
+      <InventoryPagination
+        currentPage={currentPage}
+        filteredItems={filteredItems}
+        itemsPerPage={itemsPerPage}
+        searchTerm={searchTerm}
+        setCurrentPage={setCurrentPage}
+        totalItems={totalItems}
+        totalPages={totalPages}
+      />
     </main>
   );
 }

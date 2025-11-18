@@ -12,7 +12,7 @@ interface CalendarGridProps {
 
 const DAYS_OF_WEEK_ID = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"]
 
-export default function CalendarGrid({ currentDate, events }: CalendarGridProps) {
+export default function EventCalendarGrid({ currentDate, events }: CalendarGridProps) {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 

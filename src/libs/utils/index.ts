@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import Cookies from "js-cookie";
 import { twMerge } from "tailwind-merge";
-import type { TUser } from "../types";
+import type { TAttendanceStatus, TUser } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -47,3 +47,14 @@ export function getInventoryCategory(category: string) {
       return "bg-gray-100 text-gray-800";
   }
 };
+
+export function getAttendanceStatus(status: TAttendanceStatus) {
+  const config = {
+    Hadir: { label: "Hadir", className: "bg-green-100 text-green-800" },
+    Izin: { label: "Izin", className: "bg-yellow-100 text-yellow-800" },
+    Alfa: { label: "Alpha", className: "bg-red-100 text-red-800" },
+    Sakit: { label: "Sakit", className: "bg-blue-100 text-blue-800" },
+  };
+
+  return config[status];
+}

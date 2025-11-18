@@ -15,7 +15,7 @@ interface InventoryPaginationProps {
   itemsPerPage: number
   totalItems: number
   totalPages: number
-  setCurrentPage: (number: number) => void
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function InventoryPagination({
