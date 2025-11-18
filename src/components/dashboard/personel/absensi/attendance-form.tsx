@@ -1,9 +1,10 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-
-import type React from "react";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -14,10 +15,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/auth-context";
+import { createAttendance, getTodayAttendance } from "@/libs/apis";
+import { attendanceSchema, type TAttendanceSchema } from "@/libs/schema";
+import { getAccessTokenFromCookie } from "@/libs/utils";
 
 const formatAttendanceTime = (date: Date): string => {
   const options: Intl.DateTimeFormatOptions = {
@@ -35,163 +47,335 @@ const formatAttendanceTime = (date: Date): string => {
 };
 
 export default function AttendanceForm() {
-  const [fullName, setFullName] = useState("Budi Santoso");
-  const [personnelId, setPersonnelId] = useState("USR-12345");
-  const [attendanceType, setAttendanceType] = useState("present");
-  const [remarks, setRemarks] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"success" | "duplicate">(
-    "success",
-  );
+  const [dialogType, setDialogType] = useState<
+    "success" | "error" | "duplicate"
+  >("success");
   const [submitTime, setSubmitTime] = useState("");
+  const [attendanceMessage, setAttendanceMessage] = useState("");
+  const [isAttendanceCompleted, setIsAttendanceCompleted] = useState(false);
+  const [isLoadingAttendance, setIsLoadingAttendance] = useState(true);
 
-  const [submittedList, setSubmittedList] = useState<
-    {
-      fullName: string;
-      personnelId: string;
-      attendanceType: string;
-      remarks: string;
-    }[]
-  >([]);
+  // Get user data for form
+  const fullName = user?.name || "";
+  const personnelId = user?.id || "";
 
+  const form = useForm<TAttendanceSchema>({
+    resolver: zodResolver(attendanceSchema),
+    defaultValues: {
+      attendanceType: "alfa",
+      remarks: "",
+    },
+  });
+
+  const attendanceType = form.watch("attendanceType");
+
+  // Check attendance status on mount
   useEffect(() => {
-    const saved = localStorage.getItem("attendanceRecords");
-    if (saved) setSubmittedList(JSON.parse(saved));
+    const checkTodayAttendance = async () => {
+      try {
+        const token = getAccessTokenFromCookie();
+        if (!token || token === "null") {
+          setIsLoadingAttendance(false);
+          return;
+        }
+
+        const todayAttendance = await getTodayAttendance(token);
+
+        // Check if attendance is completed (has time_out)
+        if (todayAttendance?.time_out) {
+          setIsAttendanceCompleted(true);
+        }
+      } catch (error) {
+        // Silently fail - user might not have attendance today
+        console.error("Error checking attendance:", error);
+      } finally {
+        setIsLoadingAttendance(false);
+      }
+    };
+
+    checkTodayAttendance();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Map form values to backend status values
+  const mapStatusToBackend = (
+    status: string,
+  ): "Hadir" | "Izin" | "Sakit" | "Alfa" | undefined => {
+    const statusMap: Record<string, "Hadir" | "Izin" | "Sakit" | "Alfa"> = {
+      present: "Hadir",
+      permission: "Izin",
+      sick: "Sakit",
+      alfa: "Alfa",
+    };
+    return statusMap[status];
+  };
 
-    const isDuplicate = submittedList.some(
-      (r) =>
-        r.fullName === fullName &&
-        r.personnelId === personnelId &&
-        r.attendanceType === attendanceType &&
-        r.remarks === remarks,
-    );
-
-    if (isDuplicate) {
-      setDialogType("duplicate");
-      setIsDialogOpen(true);
-      setIsSubmitting(false);
-      return;
-    }
-
+  const onSubmit = async (values: TAttendanceSchema) => {
     try {
+      const token = getAccessTokenFromCookie();
+
+      if (!token || token === "null") {
+        toast.error("Token tidak ditemukan. Silakan login ulang.");
+        return;
+      }
+
       const now = new Date();
-      const formattedTime = formatAttendanceTime(now); // Gunakan format waktu yang diminta
+      const formattedTime = formatAttendanceTime(now);
 
-      const newRecord = { fullName, personnelId, attendanceType, remarks };
-      const updatedList = [...submittedList, newRecord];
-      localStorage.setItem("attendanceRecords", JSON.stringify(updatedList));
-      setSubmittedList(updatedList);
+      // Prepare request data
+      const requestData: {
+        status?: "Hadir" | "Izin" | "Sakit" | "Alfa";
+        note?: string;
+      } = {};
 
+      const mappedStatus = mapStatusToBackend(values.attendanceType);
+      if (mappedStatus) {
+        requestData.status = mappedStatus;
+      }
+
+      if (values.remarks?.trim()) {
+        requestData.note = values.remarks.trim();
+      }
+
+      // Call API
+      const response = await createAttendance(token, requestData);
+
+      // Set success message based on API response
+      setAttendanceMessage(response.message || "Berhasil melakukan absensi");
       setSubmitTime(formattedTime);
       setDialogType("success");
       setIsDialogOpen(true);
-    } finally {
-      setIsSubmitting(false);
+
+      // Check if attendance is completed (checkout)
+      if (response.data?.time_out) {
+        setIsAttendanceCompleted(true);
+      }
+
+      // Reset form remarks if present
+      if (values.attendanceType === "present") {
+        form.setValue("remarks", "");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Gagal melakukan absensi";
+
+      // Check if error is about duplicate/complete attendance
+      if (
+        errorMessage.includes("sudah menyelesaikan") ||
+        errorMessage.includes("sudah")
+      ) {
+        setDialogType("duplicate");
+        setAttendanceMessage(errorMessage);
+      } else {
+        setDialogType("error");
+        setAttendanceMessage(errorMessage);
+        toast.error(errorMessage);
+      }
+
+      setIsDialogOpen(true);
     }
   };
 
-  const radioClass = (value: string) =>
-    `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition ${attendanceType === value
-      ? "border-green-600 bg-green-50 shadow-md scale-[1.02]"
-      : "border-gray-200 hover:border-gray-300"
-    }`;
+  const getRadioClass = (value: string) => {
+    const colorMap: Record<
+      string,
+      { active: string; inactive: string; hover: string }
+    > = {
+      present: {
+        active: "border-green-600 bg-green-50",
+        inactive: "border-gray-200",
+        hover: "hover:border-green-300",
+      },
+      permission: {
+        active: "border-yellow-600 bg-yellow-50",
+        inactive: "border-gray-200",
+        hover: "hover:border-yellow-300",
+      },
+      sick: {
+        active: "border-blue-600 bg-blue-50",
+        inactive: "border-gray-200",
+        hover: "hover:border-blue-300",
+      },
+      alfa: {
+        active: "border-red-600 bg-red-50",
+        inactive: "border-gray-200",
+        hover: "hover:border-red-300",
+      },
+    };
+
+    const colors = colorMap[value] || colorMap.present;
+    const isActive = attendanceType === value;
+
+    return `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition ${isActive
+      ? `${colors.active} shadow-md scale-[1.02]`
+      : `${colors.inactive} ${colors.hover}`
+      }`;
+  };
 
   return (
     <>
       <Card className="p-8 shadow-lg hover:shadow-xl transition">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900">Form Absensi</h2>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Form Absensi
+            </h2>
 
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Nama Lengkap</Label>
-            <Input
-              id="fullName"
-              type="text"
-              placeholder="Budi Santoso"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
+            {/* Nama Lengkap - Read Only */}
+            <FormItem>
+              <FormLabel>Nama Lengkap</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Loading..."
+                  value={fullName}
+                  readOnly
+                  disabled
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </FormControl>
+            </FormItem>
+
+            {/* ID Personel - Read Only */}
+            <FormItem>
+              <FormLabel>ID Personel</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Loading..."
+                  value={personnelId}
+                  readOnly
+                  disabled
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </FormControl>
+            </FormItem>
+
+            {/* Jenis Absensi */}
+            <FormField
+              control={form.control}
+              name="attendanceType"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Jenis Absensi</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex space-x-1"
+                    >
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className={getRadioClass("present")}>
+                          <RadioGroupItem
+                            value="present"
+                            id="present"
+                            className="mt-1"
+                          />
+                          <FormLabel
+                            htmlFor="present"
+                            className="cursor-pointer flex-1 m-0 font-normal"
+                          >
+                            Hadir
+                          </FormLabel>
+                        </div>
+
+                        <div className={getRadioClass("permission")}>
+                          <RadioGroupItem
+                            value="permission"
+                            id="permission"
+                            className="mt-1"
+                          />
+                          <FormLabel
+                            htmlFor="permission"
+                            className="cursor-pointer flex-1 m-0 font-normal"
+                          >
+                            Izin
+                          </FormLabel>
+                        </div>
+
+                        <div className={getRadioClass("sick")}>
+                          <RadioGroupItem
+                            value="sick"
+                            id="sick"
+                            className="mt-1"
+                          />
+                          <FormLabel
+                            htmlFor="sick"
+                            className="cursor-pointer flex-1 m-0 font-normal"
+                          >
+                            Sakit
+                          </FormLabel>
+                        </div>
+
+                        <div className={getRadioClass("alfa")}>
+                          <RadioGroupItem
+                            value="alfa"
+                            id="alfa"
+                            className="mt-1"
+                          />
+                          <FormLabel
+                            htmlFor="alfa"
+                            className="cursor-pointer flex-1 m-0 font-normal"
+                          >
+                            Alfa
+                          </FormLabel>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="personnelId">ID Personel</Label>
-            <Input
-              id="personnelId"
-              type="text"
-              placeholder="USR-12345"
-              value={personnelId}
-              onChange={(e) => setPersonnelId(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-3">
-            <Label>Jenis Absensi</Label>
-            <RadioGroup
-              value={attendanceType}
-              onValueChange={setAttendanceType}
-            >
-              <div className="grid grid-cols-3 gap-4">
-                <div className={radioClass("present")}>
-                  <RadioGroupItem value="present" id="present" />
-                  <Label
-                    htmlFor="present"
-                    className="cursor-pointer flex-1 m-0"
-                  >
-                    Hadir
-                  </Label>
-                </div>
-
-                <div className={radioClass("permission")}>
-                  <RadioGroupItem value="permission" id="permission" />
-                  <Label
-                    htmlFor="permission"
-                    className="cursor-pointer flex-1 m-0"
-                  >
-                    Izin
-                  </Label>
-                </div>
-
-                <div className={radioClass("sick")}>
-                  <RadioGroupItem value="sick" id="sick" />
-                  <Label htmlFor="sick" className="cursor-pointer flex-1 m-0">
-                    Sakit
-                  </Label>
-                </div>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Tampilkan kolom keterangan hanya jika bukan hadir */}
-          {attendanceType !== "present" && (
-            <div className="space-y-2">
-              <Label htmlFor="remarks">Keterangan</Label>
-              <Textarea
-                id="remarks"
-                placeholder={`Masukkan alasan ${attendanceType === "permission" ? "izin" : "sakit"}`}
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
+            {/* Keterangan - Conditional */}
+            {attendanceType !== "present" && (
+              <FormField
+                control={form.control}
+                name="remarks"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Keterangan</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={
+                          attendanceType === "permission"
+                            ? "Masukkan alasan izin"
+                            : attendanceType === "sick"
+                              ? "Masukkan alasan sakit"
+                              : "Masukkan keterangan alfa"
+                        }
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          )}
+            )}
 
-          <div className="pt-4 flex justify-end">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 transition-transform hover:scale-105"
-            >
-              {isSubmitting ? "Mengirim..." : "Submit"}
-            </Button>
-          </div>
-        </form>
+            <div className="pt-4 flex justify-end">
+              <Button
+                type="submit"
+                disabled={
+                  form.formState.isSubmitting ||
+                  isAttendanceCompleted ||
+                  isLoadingAttendance
+                }
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingAttendance
+                  ? "Memuat..."
+                  : isAttendanceCompleted
+                    ? "Absensi Selesai"
+                    : form.formState.isSubmitting
+                      ? "Mengirim..."
+                      : "Submit"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </Card>
 
       {/* ✨ Popup interaktif */}
@@ -217,20 +401,32 @@ export default function AttendanceForm() {
                         Absensi Berhasil!
                       </DialogTitle>
                       <DialogDescription className="text-gray-700 text-sm p-0 m-0 leading-relaxed font-normal text-center">
-                        Anda telah berhasil melakukan absensi masuk
+                        {attendanceMessage ||
+                          "Anda telah berhasil melakukan absensi"}
                         <br />
                         pada {submitTime}
                       </DialogDescription>
                     </>
-                  ) : (
+                  ) : dialogType === "duplicate" ? (
                     <>
                       <AlertTriangle className="mx-auto text-yellow-600 w-14 h-14 mb-2" />
                       <DialogTitle className="text-yellow-700 text-2xl font-semibold text-center">
-                        Anda Sudah Absen
+                        Absensi Gagal
                       </DialogTitle>
                       <DialogDescription className="text-gray-700 text-center">
-                        Data absensi dengan nama dan ID yang sama sudah tercatat
-                        sebelumnya.
+                        {attendanceMessage ||
+                          "Data absensi dengan nama dan ID yang sama sudah tercatat sebelumnya."}
+                      </DialogDescription>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="mx-auto text-red-600 w-14 h-14 mb-2" />
+                      <DialogTitle className="text-red-700 text-2xl font-semibold text-center">
+                        Error
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-700 text-center">
+                        {attendanceMessage ||
+                          "Terjadi kesalahan saat melakukan absensi."}
                       </DialogDescription>
                     </>
                   )}
@@ -242,7 +438,9 @@ export default function AttendanceForm() {
                     w-[70%] h-12 rounded-lg text-base font-medium
                     ${dialogType === "success"
                         ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-yellow-600 hover:bg-yellow-700"
+                        : dialogType === "duplicate"
+                          ? "bg-yellow-600 hover:bg-yellow-700"
+                          : "bg-red-600 hover:bg-red-700"
                       } text-white
                     `}
                   >

@@ -89,3 +89,56 @@ export async function deleteInventory(token: string, id: string) {
   return res;
 }
 
+export async function getTodayAttendance(token: string) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/attendance/today`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    cache: "no-store",
+  });
+
+  const responseData = await res.json();
+
+  if (!res.ok) {
+    // If no attendance found (404), return null instead of throwing
+    if (res.status === 404) {
+      return null;
+    }
+    throw new Error(responseData.message || "Gagal mengambil data absensi");
+  }
+
+  return responseData.data || null;
+}
+
+export async function createAttendance(
+  token: string,
+  data: {
+    userId?: string;
+    status?: "Hadir" | "Izin" | "Sakit" | "Alfa";
+    note?: string;
+  }
+) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/attendance`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const responseData = await res.json();
+
+  if (!res.ok) {
+    throw new Error(responseData.message || "Gagal melakukan absensi");
+  }
+
+  return responseData;
+}
+

@@ -21,4 +21,13 @@ export const createInventory = z.object({
   image: z.array(z.instanceof(File)).optional(),
 });
 
-export type TCreateInventory = z.infer<typeof createInventory>
+export type TCreateInventory = z.infer<typeof createInventory>;
+
+export const attendanceSchema = z.object({
+  attendanceType: z.enum(["present", "permission", "sick", "alfa"], {
+    required_error: "Pilih jenis absensi",
+  }),
+  remarks: z.string().optional(),
+});
+
+export type TAttendanceSchema = z.infer<typeof attendanceSchema>;
