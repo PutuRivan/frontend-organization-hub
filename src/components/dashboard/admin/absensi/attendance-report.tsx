@@ -11,7 +11,6 @@ import AttendanceTable from "./attendance-table";
 
 export function AttendanceReport() {
   const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
@@ -31,7 +30,6 @@ export function AttendanceReport() {
         currentPage,
         itemsPerPage,
         startDate,
-        endDate,
         search
       );
       setData(result.data);
@@ -40,7 +38,7 @@ export function AttendanceReport() {
       console.error(error);
     }
     setLoading(false);
-  }, [token, currentPage, startDate, endDate, search]);
+  }, [token, currentPage, startDate, search]);
 
   useEffect(() => {
     fetchData();
@@ -48,7 +46,6 @@ export function AttendanceReport() {
 
   const handleReset = () => {
     setStartDate("");
-    setEndDate("");
     setSearch("");
     setCurrentPage(1);
   };
@@ -60,26 +57,13 @@ export function AttendanceReport() {
 
   return (
     <div className="space-y-5">
-      {/* Search */}
-      <div className="flex justify-end">
-        <input
-          type="text"
-          placeholder="Cari nama personel..."
-          className="border rounded-lg px-3 py-2 w-72"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
-      </div>
-
       {/* Filters */}
       <AttendanceFilterContainer
         startDate={startDate}
-        endDate={endDate}
+        search={search}
         setStartDate={setStartDate}
-        setEndDate={setEndDate}
+        setSearch={setSearch}
+        setCurrentPage={setCurrentPage}
         handleReset={handleReset}
       />
 

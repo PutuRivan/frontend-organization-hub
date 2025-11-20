@@ -6,44 +6,46 @@ import { Label } from "@/components/ui/label";
 
 interface AttendanceFilterContainerProps {
   startDate: string;
-  endDate: string;
+  search: string;
   setStartDate: React.Dispatch<React.SetStateAction<string>>;
-  setEndDate: React.Dispatch<React.SetStateAction<string>>;
-  handleReset: () => void
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  handleReset: () => void;
 }
 
 export default function AttendanceFilterContainer({
   startDate,
-  endDate,
+  search,
   setStartDate,
-  setEndDate,
-  handleReset
+  setSearch,
+  setCurrentPage,
+  handleReset,
 }: AttendanceFilterContainerProps) {
   return (
     <Card className="p-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-end">
-        {/* Start Date */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Tanggal Mulai</Label>
+          <Label className="text-sm font-medium">Nama Personel</Label>
           <Input
-            type="date"
-            value={startDate.split("/").reverse().join("-")}
+            type="text"
+            placeholder="Cari nama personel..."
+            value={search}
             onChange={(e) => {
-              const [year, month, day] = e.target.value.split("-");
-              setStartDate(`${month}/${day}/${year}`);
+              setSearch(e.target.value);
+              setCurrentPage(1);
             }}
           />
         </div>
 
-        {/* End Date */}
+        {/* Start Date */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Tanggal Selesai</Label>
+          <Label className="text-sm font-medium">Tanggal</Label>
           <Input
             type="date"
-            value={endDate.split("/").reverse().join("-")}
+            value={startDate} 
             onChange={(e) => {
-              const [year, month, day] = e.target.value.split("-");
-              setEndDate(`${month}/${day}/${year}`);
+              setStartDate(e.target.value);
+              setCurrentPage(1);
             }}
           />
         </div>

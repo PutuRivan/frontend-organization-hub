@@ -94,19 +94,16 @@ export async function getAllAttendance(
   page = 1,
   limit = 5,
   startDate?: string,
-  endDate?: string,
-  search?: string
+  name?: string
 ) {
   const parsedToken = JSON.parse(token)
   const params = new URLSearchParams();
-
   params.append("page", page.toString());
   params.append("limit", limit.toString());
 
   if (startDate) params.append("startDate", startDate);
-  if (endDate) params.append("endDate", endDate);
-  if (search) params.append("search", search);
-
+  if (name) params.append("name", name);
+  console.log(params.toString())
   try {
     const res = await fetch(`${API_URL}/attendance/personel?${params.toString()}`, {
       method: "GET",
