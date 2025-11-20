@@ -89,6 +89,47 @@ export async function deleteInventory(token: string, id: string) {
   return res;
 }
 
+export async function getAllAttendance(
+  token: string,
+  page = 1,
+  limit = 5,
+  startDate?: string,
+  endDate?: string,
+  search?: string
+) {
+  const parsedToken = JSON.parse(token)
+  const params = new URLSearchParams();
+
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
+
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+  if (search) params.append("search", search);
+
+  try {
+    const res = await fetch(`${API_URL}/attendance/personel?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${parsedToken}`, // Token
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Gagal mengambil data attendance");
+    }
+
+    const result = await res.json();
+    return result; // {success, pagination, data}
+  } catch (error) {
+    console.error("Error getAllAttendance:", error);
+    throw error;
+  }
+}
+
+
 export async function getTodayAttendance(token: string) {
   const parsedToken = JSON.parse(token);
 

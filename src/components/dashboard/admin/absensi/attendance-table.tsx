@@ -1,30 +1,39 @@
-import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getAttendanceStatus } from '@/libs/utils'
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { TAttandance } from "@/libs/types";
+import { formatDateTime, getAttendanceStatus } from "@/libs/utils";
 
 interface AttendanceTableProps {
-  sampleData: any
+  data: TAttandance[];
 }
 
-export default function AttendanceTable({ sampleData }: AttendanceTableProps) {
+export default function AttendanceTable({ data }: AttendanceTableProps) {
+  console.log(data)
   return (
     <Table>
       <TableHeader>
         <TableRow className="bg-muted">
-          <TableHead>NAMA PERSONEL</TableHead>
-          <TableHead>JABATAN</TableHead>
-          <TableHead>TANGGAL</TableHead>
-          <TableHead>STATUS</TableHead>
+          <TableHead>Nama Personel</TableHead>
+          <TableHead>jabatan</TableHead>
+          <TableHead>Tanggal</TableHead>
+          <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sampleData.map((item) => (
+        {data.map((item) => (
           <TableRow key={item.id}>
-            <TableCell className="font-medium">{item.name}</TableCell>
-            <TableCell className="text-muted-foreground">
-              {item.position}
+            <TableCell className="font-medium">{item.user.name}</TableCell>
+            <TableCell className="font-medium">
+              {item.user.position}
             </TableCell>
-            <TableCell>{item.date}</TableCell>
+            <TableCell>{formatDateTime(item.date)}</TableCell>
             <TableCell>
               <Badge
                 variant="secondary"
@@ -37,5 +46,5 @@ export default function AttendanceTable({ sampleData }: AttendanceTableProps) {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

@@ -49,7 +49,7 @@ export function getInventoryCategory(category: string) {
 };
 
 export function getAttendanceStatus(status: TAttendanceStatus) {
-  const config = {
+  const config: Record<string, { label: string; className: string }> = {
     Hadir: { label: "Hadir", className: "bg-green-100 text-green-800" },
     Izin: { label: "Izin", className: "bg-yellow-100 text-yellow-800" },
     Alfa: { label: "Alpha", className: "bg-red-100 text-red-800" },
@@ -57,4 +57,19 @@ export function getAttendanceStatus(status: TAttendanceStatus) {
   };
 
   return config[status];
+}
+
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) return "-";
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${day}-${month}-${year}, ${hours}:${minutes}`;
 }
