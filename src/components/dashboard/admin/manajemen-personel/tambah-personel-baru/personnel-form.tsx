@@ -1,183 +1,211 @@
 'use client'
 
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { FileUpload } from './file-upload'
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/shadcn-io/dropzone'
+import ImagePreview from '../../inventaris-barang/create/image-preview'
+import { useState } from 'react'
+import { personelSchema, TPersonelSchema } from '@/libs/schema'
 
-interface FormData {
-  nama_lengkap: string
-  nrp_id: string
-  jabatan: string
-  divisi: string
-  nomor_telepon: string
-  email: string
-  alamat: string
-  status_aktif: boolean
-  foto: File | null
-}
+export default function PersonnelForm() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false)
 
-export function PersonnelForm() {
-  const [formData, setFormData] = useState<FormData>({
-    nama_lengkap: '',
-    nrp_id: '',
-    jabatan: '',
-    divisi: '',
-    nomor_telepon: '',
-    email: '',
-    alamat: '',
-    status_aktif: true,
-    foto: null,
-  })
-  const [errors, setErrors] = useState<Partial<FormData>>({})
-
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {}
-    if (!formData.nama_lengkap.trim()) newErrors.nama_lengkap = 'Nama lengkap harus diisi'
-    if (!formData.nrp_id.trim()) newErrors.nrp_id = 'NRP / ID harus diisi'
-    if (!formData.jabatan) newErrors.jabatan = 'Jabatan harus dipilih'
-    if (!formData.divisi) newErrors.divisi = 'Divisi harus dipilih'
-    if (!formData.nomor_telepon.trim()) newErrors.nomor_telepon = 'Nomor telepon harus diisi'
-    if (!formData.email.trim()) newErrors.email = 'Email harus diisi'
-    else if (!validateEmail(formData.email)) newErrors.email = 'Format email tidak valid'
-    if (!formData.alamat.trim()) newErrors.alamat = 'Alamat harus diisi'
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    if (errors[name as keyof FormData]) setErrors(prev => ({ ...prev, [name]: undefined }))
-  }
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }))
-    if (errors[name as keyof FormData]) setErrors(prev => ({ ...prev, [name]: undefined }))
-  }
-
-  const handleFileUpload = (file: File) => setFormData(prev => ({ ...prev, foto: file }))
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (validateForm()) console.log('Form submitted:', formData)
-  }
-
-  const handleReset = () => {
-    setFormData({
-      nama_lengkap: '',
-      nrp_id: '',
+  const form = useForm<TPersonelSchema>({
+    resolver: zodResolver(personelSchema),
+    defaultValues: {
+      nama: '',
+      nrp: '',
       jabatan: '',
-      divisi: '',
-      nomor_telepon: '',
+      pangkat: '',
+      password: '',
+      image: null,
       email: '',
-      alamat: '',
-      status_aktif: true,
-      foto: null,
-    })
-    setErrors({})
+      role: 'Personel',
+      status: true
+    },
+  })
+
+  const handleDrop = (acceptedFiles: File[]) => {
+    const newFiles = [...files, ...acceptedFiles];
+    setFiles(newFiles);
+    setFilePreviews(newFiles.map((file) => URL.createObjectURL(file)));
+
+    // Sinkron ke react-hook-form
+    form.setValue("image", newFiles);
+  };
+
+  // Hapus file
+  const handleRemoveImage = (index: number) => {
+    const updatedFiles = files.filter((_, i) => i !== index);
+    setFiles(updatedFiles);
+    setFilePreviews(updatedFiles.map((file) => URL.createObjectURL(file)));
+
+    // Sinkron ke react-hook-form
+    form.setValue("image", updatedFiles);
+  };
+
+  const onSubmit = async (values: TPersonelSchema) => {
+    setLoading(true)
+    console.log('Form submitted:', values)
+    setLoading(false)
   }
 
   return (
-    <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Tambah Personel</h1>
-        <p className="text-muted-foreground">Lengkapi data personel berikut untuk menambahkan ke sistem.</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="bg-card rounded-lg border border-border p-4 sm:p-6 space-y-6 w-full">
-        {/* Data Pribadi */}
-        <section className="space-y-4">
-          <div>
-            <Label htmlFor="nama_lengkap">Nama Lengkap</Label>
-            <Input id="nama_lengkap" name="nama_lengkap" value={formData.nama_lengkap} onChange={handleInputChange} className="mt-2" />
-            {errors.nama_lengkap && <p className="text-destructive text-sm mt-1">{errors.nama_lengkap}</p>}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="nrp_id">NRP / ID Personel</Label>
-              <Input id="nrp_id" name="nrp_id" value={formData.nrp_id} onChange={handleInputChange} className="mt-2" />
-              {errors.nrp_id && <p className="text-destructive text-sm mt-1">{errors.nrp_id}</p>}
-            </div>
-            <div>
-              <Label htmlFor="jabatan">Jabatan</Label>
-              <Select value={formData.jabatan} onValueChange={v => handleSelectChange('jabatan', v)}>
-                <SelectTrigger id="jabatan" className="mt-2">
-                  <SelectValue placeholder="Pilih jabatan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="supervisor">Supervisor</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="intern">Intern</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.jabatan && <p className="text-destructive text-sm mt-1">{errors.jabatan}</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="divisi">Divisi / Satuan</Label>
-              <Select value={formData.divisi} onValueChange={v => handleSelectChange('divisi', v)}>
-                <SelectTrigger id="divisi" className="mt-2">
-                  <SelectValue placeholder="Pilih divisi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="it">IT</SelectItem>
-                  <SelectItem value="hr">HR</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="operations">Operations</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.divisi && <p className="text-destructive text-sm mt-1">{errors.divisi}</p>}
-            </div>
-            <div>
-              <Label htmlFor="nomor_telepon">Nomor Telepon</Label>
-              <Input id="nomor_telepon" name="nomor_telepon" value={formData.nomor_telepon} onChange={handleInputChange} className="mt-2" />
-              {errors.nomor_telepon && <p className="text-destructive text-sm mt-1">{errors.nomor_telepon}</p>}
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" value={formData.email} onChange={handleInputChange} className="mt-2" />
-            {errors.email && <p className="text-destructive text-sm mt-1">{errors.email}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="alamat">Alamat</Label>
-            <Textarea id="alamat" name="alamat" value={formData.alamat} onChange={handleInputChange} className="mt-2 resize-none" rows={4} />
-            {errors.alamat && <p className="text-destructive text-sm mt-1">{errors.alamat}</p>}
-          </div>
-        </section>
+    <Form {...form} >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Nama Lengkap */}
+          <FormField
+            control={form.control}
+            name="nama"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nama Lengkap</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nama lengkap" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* NRP / ID */}
+          <FormField
+            control={form.control}
+            name="nrp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>NRP / ID Personel</FormLabel>
+                <FormControl>
+                  <Input placeholder="NRP / ID" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Jabatan */}
+          <FormField
+            control={form.control}
+            name="jabatan"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Jabatan</FormLabel>
+                <FormControl>
+                  <Input placeholder="jabatan" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* pangkat */}
+          <FormField
+            control={form.control}
+            name="pangkat"
+            render={({ field }) => (
+              <FormItem className="">
+                <FormLabel>Divisi / Satuan</FormLabel>
+                <FormControl>
+                  <Input placeholder="Pangkat" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Nomor Telepon */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input placeholder="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Email */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="email@domain.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Foto Personel */}
-        <section>
-          <Label>Upload Foto Personel</Label>
-          <FileUpload onFileUpload={handleFileUpload} />
-          {formData.foto && <p className="text-sm text-muted-foreground mt-2">File terpilih: {formData.foto.name}</p>}
-        </section>
+        <FormField
+          control={form.control}
+          name='image'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload Foto Personel</FormLabel>
+              <FormControl>
+                <div className="w-full">
+                  <Dropzone
+                    maxFiles={5}
+                    accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
+                    onDrop={(files) => {
+                      handleDrop(files);
+                      field.onChange(files); // update react-hook-form
+                    }}
+                  >
+                    <DropzoneEmptyState />
+                    <DropzoneContent />
+                  </Dropzone>
+                  {filePreviews.length > 0 && (
+                    <ImagePreview
+                      filePreviews={filePreviews}
+                      onRemove={(index) => {
+                        handleRemoveImage(index);
+                        // update form value juga
+                        const newFiles = files.filter((_, i) => i !== index);
+                        field.onChange(newFiles);
+                      }}
+                    />
+                  )}
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
-        {/* Status */}
-        <section className="flex items-center justify-between py-4 border-t border-border">
-          <Label htmlFor="status_aktif">Status Aktif</Label>
-          <Switch id="status_aktif" checked={formData.status_aktif} onCheckedChange={checked => setFormData(prev => ({ ...prev, status_aktif: checked }))} />
-        </section>
+        {/* Status Aktif */}
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between">
+              <FormLabel>Status Aktif</FormLabel>
+              <Switch checked={field.value} onCheckedChange={field.onChange} />
+            </FormItem>
+          )}
+        />
 
         {/* Buttons */}
-        <section className="flex flex-wrap gap-4 justify-end pt-4">
-          <Button type="button" variant="outline" onClick={handleReset} className="px-6 sm:px-8">Batal</Button>
-          <Button type="submit" className="px-6 sm:px-8 bg-blue-600 hover:bg-blue-700 text-white">Simpan</Button>
-        </section>
+        <div className="flex justify-end gap-5">
+          <Button variant="outline" disabled={loading}>
+            Batal
+          </Button>
+          <Button type="submit" disabled={loading}>
+            Simpan
+          </Button>
+        </div>
       </form>
-    </div>
+    </Form>
   )
 }

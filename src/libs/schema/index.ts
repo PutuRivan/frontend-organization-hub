@@ -31,3 +31,17 @@ export const attendanceSchema = z.object({
 });
 
 export type TAttendanceSchema = z.infer<typeof attendanceSchema>;
+
+export const personelSchema = z.object({
+  nama: z.string().min(1, { message: 'Nama lengkap harus diisi' }),
+  email: z.string().email({ message: 'Format email tidak valid' }),
+  nrp: z.string().min(1, { message: 'NRP / ID harus diisi' }),
+  image: z.any().optional(),
+  jabatan: z.string().min(1, { message: 'Jabatan harus dipilih' }),
+  password: z.string().min(1, { message: 'Password harus diisi' }),
+  status: z.boolean(),
+  role: z.string().optional(),
+  pangkat: z.string(),
+})
+
+export type TPersonelSchema = z.infer<typeof personelSchema>;
