@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-interface AddEventDialogProps {
+interface EventAddDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onAddEvent: (title: string, date: Date, category: string) => void
 }
 
-export default function AddEventDialog({ open, onOpenChange, onAddEvent }: AddEventDialogProps) {
+export default function EventAddDialog({ open, onOpenChange, onAddEvent }: EventAddDialogProps) {
   const [title, setTitle] = useState("")
   const [date, setDate] = useState("")
   const [category, setCategory] = useState("meeting")

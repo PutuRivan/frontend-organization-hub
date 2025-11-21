@@ -2,15 +2,15 @@
 
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import AddEventDialog from "@/components/dashboard/admin/jadwal-kegiatan/add-event-dialog";
 import EventCalendarHeader from "@/components/dashboard/admin/jadwal-kegiatan/event-calendar-header";
 import EventCalendarGrid from "@/components/dashboard/admin/jadwal-kegiatan/event-calender-grid";
 import EventList from "@/components/dashboard/admin/jadwal-kegiatan/event-list";
 import HeaderContent from "@/components/dashboard/base/header-content";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EventFilterContainer from "@/components/dashboard/admin/jadwal-kegiatan/event-filter-container";
+import EventAddDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-add-dialog";
 
 interface Event {
   id: string;
@@ -99,19 +99,10 @@ export default function Home() {
       </HeaderContent>
 
       {/* Search and Tabs */}
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="flex gap-2 items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Cari kegiatan..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-      </div>
+      <EventFilterContainer
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       <Tabs defaultValue="calendar">
         <TabsList>
           <TabsTrigger value="calendar">Tampilan Kalender</TabsTrigger>
@@ -141,7 +132,7 @@ export default function Home() {
         </Card>
       </Tabs>
 
-      <AddEventDialog
+      <EventAddDialog
         open={showAddEvent}
         onOpenChange={setShowAddEvent}
         onAddEvent={handleAddEvent}
