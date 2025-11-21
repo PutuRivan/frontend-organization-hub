@@ -1,7 +1,7 @@
 "use client";
 
-import { Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import EventCalendarHeader from "@/components/dashboard/admin/jadwal-kegiatan/event-calendar-header";
 import EventCalendarGrid from "@/components/dashboard/admin/jadwal-kegiatan/event-calender-grid";
 import EventList from "@/components/dashboard/admin/jadwal-kegiatan/event-list";
@@ -11,8 +11,28 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EventFilterContainer from "@/components/dashboard/admin/jadwal-kegiatan/event-filter-container";
 import EventAddDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-add-dialog";
+import { getAllEvents } from "@/libs/apis";
+import { getAccessTokenFromCookie } from "@/libs/utils";
 
 interface Event {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  start_datetime: string;
+  end_datetime: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+    position: string;
+  };
+}
+
+interface EventForCalendar {
   id: string;
   title: string;
   date: Date;
@@ -20,35 +40,47 @@ interface Event {
 }
 
 export default function Home() {
-  const [currentDate, setCurrentDate] = useState(new Date(2023, 11, 1));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: "1",
-      title: "Rapat Tim",
-      date: new Date(2023, 11, 6),
-      category: "meeting",
-    },
-    {
-      id: "2",
-      title: "Presentasi Klien",
-      date: new Date(2023, 11, 6),
-      category: "presentation",
-    },
-    {
-      id: "3",
-      title: "Project Deadline",
-      date: new Date(2023, 11, 21),
-      category: "deadline",
-    },
-  ]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
 
-  const filteredEvents = useMemo(() => {
-    return events.filter((event) =>
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [events, searchQuery]);
+  const token = getAccessTokenFromCookie();
+
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getAllEvents(
+        token,
+        currentPage,
+        itemsPerPage,
+        searchQuery
+      );
+      setEvents(result.data);
+      setTotalItems(result.pagination.totalItems);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+    setLoading(false);
+  }, [token, currentPage, searchQuery]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  // Convert API events to calendar format
+  const calendarEvents: EventForCalendar[] = useMemo(() => {
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      date: new Date(event.start_datetime),
+      category: "meeting" as const, // Default category, can be enhanced later
+    }));
+  }, [events]);
 
   const handlePreviousMonth = () => {
     setCurrentDate(
@@ -67,14 +99,11 @@ export default function Home() {
   };
 
   const handleAddEvent = (title: string, date: Date, category: string) => {
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      title,
-      date,
-      category: category as "meeting" | "presentation" | "deadline",
-    };
-    setEvents([...events, newEvent]);
+    // TODO: Implement API call to create event
+    console.log("Add event:", { title, date, category });
     setShowAddEvent(false);
+    // Refresh events after adding
+    fetchEvents();
   };
 
   const monthName = currentDate.toLocaleDateString("id-ID", {
@@ -111,24 +140,30 @@ export default function Home() {
 
         {/* Content */}
         <Card className="p-6">
-          <TabsContent value="calendar">
-            <EventCalendarHeader
-              handleNextMonth={handleNextMonth}
-              handlePreviousMonth={handlePreviousMonth}
-              handleToday={handleToday}
-              monthName={monthName}
-            />
+          {loading ? (
+            <p className="text-center py-6">Memuat data...</p>
+          ) : (
+            <>
+              <TabsContent value="calendar">
+                <EventCalendarHeader
+                  handleNextMonth={handleNextMonth}
+                  handlePreviousMonth={handlePreviousMonth}
+                  handleToday={handleToday}
+                  monthName={monthName}
+                />
 
-            {/* Calendar Grid */}
-            <EventCalendarGrid
-              currentDate={currentDate}
-              events={filteredEvents}
-            />
-          </TabsContent>
+                {/* Calendar Grid */}
+                <EventCalendarGrid
+                  currentDate={currentDate}
+                  events={calendarEvents}
+                />
+              </TabsContent>
 
-          <TabsContent value="list">
-            <EventList events={filteredEvents} />
-          </TabsContent>
+              <TabsContent value="list">
+                <EventList events={calendarEvents} />
+              </TabsContent>
+            </>
+          )}
         </Card>
       </Tabs>
 

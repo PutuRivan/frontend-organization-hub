@@ -198,3 +198,39 @@ export async function getAllPersonel(
 
   return await res.json()
 }
+
+export async function getAllEvents(
+  token: string,
+  page: number = 1,
+  limit: number = 10,
+  search?: string
+) {
+  const parsedToken = JSON.parse(token);
+  const params = new URLSearchParams();
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
+
+  if (search) params.append("search", search);
+
+  try {
+    const res = await fetch(`${API_URL}/events?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${parsedToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Gagal mengambil data events");
+    }
+
+    const result = await res.json();
+    return result; // {success, pagination, data}
+  } catch (error) {
+    console.error("Error getAllEvents:", error);
+    throw error;
+  }
+}
