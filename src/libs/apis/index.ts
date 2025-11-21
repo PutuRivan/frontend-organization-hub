@@ -12,6 +12,22 @@ export async function CheckToken(token: string): Promise<TTokenCheckResponse> {
   }).then((response) => response.json());
 }
 
+export async function countTable(token: string) {
+  const parsedToken = JSON.parse(token);
+  const res = await fetch(`${API_URL}/dashboard`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${parsedToken}`,
+    },
+  });
+  console.log(res)
+  if (!res.ok) {
+    throw new Error("Gagal mengambil data count table");
+  }
+
+  return await res.json();
+}
+
 export async function getInventory(
   token: string,
   page: number = 1,

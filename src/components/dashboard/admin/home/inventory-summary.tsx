@@ -4,35 +4,50 @@ import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 import { Card } from "@/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const chartData = [
-  {
-    category: "inventory",
-    tersedia: 612,
-    dipinjam: 180,
-    perbaikan: 50,
-  },
-]
+interface InventoryData {
+  totalItems: number;
+  totalQuantity: number;
+  baik: number;
+  rusak: number;
+  hilang: number;
+  baikPercentage: number;
+  rusakPercentage: number;
+  hilangPercentage: number;
+}
+
+interface InventorySummaryProps {
+  inventoryData?: InventoryData;
+}
 
 const chartConfig = {
-  tersedia: {
-    label: "Tersedia",
+  baik: {
+    label: "Baik",
     color: "#10b981",
   },
-  dipinjam: {
-    label: "Dipinjam",
-    color: "#f59e0b",
-  },
-  perbaikan: {
-    label: "Perbaikan",
+  rusak: {
+    label: "Rusak",
     color: "#ef4444",
+  },
+  hilang: {
+    label: "Hilang",
+    color: "#6b7280",
   },
 } satisfies ChartConfig
 
-export default function InventorySummary() {
-  const total = 842
-  const available = 612
-  const borrowed = 180
-  const repair = 50
+export default function InventorySummary({ inventoryData }: InventorySummaryProps) {
+  const total = inventoryData?.totalItems ?? 0;
+  const baik = inventoryData?.baik ?? 0;
+  const rusak = inventoryData?.rusak ?? 0;
+  const hilang = inventoryData?.hilang ?? 0;
+
+  const chartData = [
+    {
+      category: "inventory",
+      baik: baik,
+      rusak: rusak,
+      hilang: hilang,
+    },
+  ];
 
   return (
     <Card className="flex flex-col p-6 bg-white">
@@ -51,7 +66,7 @@ export default function InventorySummary() {
                         {total}
                       </tspan>
                       <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 4} className="fill-gray-600 text-sm">
-                        Total
+                        Total Items
                       </tspan>
                     </text>
                   )
@@ -60,24 +75,24 @@ export default function InventorySummary() {
             />
           </PolarRadiusAxis>
           <RadialBar
-            dataKey="tersedia"
+            dataKey="baik"
             stackId="a"
             cornerRadius={5}
             fill="#10b981"
             className="stroke-transparent stroke-2"
           />
           <RadialBar
-            dataKey="dipinjam"
-            stackId="a"
-            cornerRadius={5}
-            fill="#f59e0b"
-            className="stroke-transparent stroke-2"
-          />
-          <RadialBar
-            dataKey="perbaikan"
+            dataKey="rusak"
             stackId="a"
             cornerRadius={5}
             fill="#ef4444"
+            className="stroke-transparent stroke-2"
+          />
+          <RadialBar
+            dataKey="hilang"
+            stackId="a"
+            cornerRadius={5}
+            fill="#6b7280"
             className="stroke-transparent stroke-2"
           />
         </RadialBarChart>
@@ -85,17 +100,26 @@ export default function InventorySummary() {
 
       {/* Legend */}
       <div className="mt-6 space-y-2">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-green-500"></div>
-          <span className="text-sm text-gray-700">Tersedia: {available}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-green-500"></div>
+            <span className="text-sm text-gray-700">Baik</span>
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{baik}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-          <span className="text-sm text-gray-700">Dipinjam: {borrowed}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500"></div>
+            <span className="text-sm text-gray-700">Rusak</span>
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{rusak}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-red-500"></div>
-          <span className="text-sm text-gray-700">Perbaikan: {repair}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-gray-500"></div>
+            <span className="text-sm text-gray-700">Hilang</span>
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{hilang}</span>
         </div>
       </div>
     </Card>

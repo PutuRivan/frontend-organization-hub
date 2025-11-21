@@ -1,95 +1,150 @@
 "use client";
 
 import {
-  CartesianGrid,
-  Line,
-  LineChart,
+  Cell,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
-  XAxis,
-  YAxis,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 
-export default function AttendanceChart() {
-  // Sample data for 30 days
+interface AttendanceData {
+  total: number;
+  hadir: number;
+  izin: number;
+  sakit: number;
+  alfa: number;
+  hadirPercentage: number;
+  izinPercentage: number;
+  sakitPercentage: number;
+  alfaPercentage: number;
+  period: {
+    start: string;
+    end: string;
+    month: string;
+  };
+}
+
+interface AttendanceChartProps {
+  attendanceData?: AttendanceData;
+}
+
+const COLORS = {
+  hadir: "#10b981",
+  izin: "#f59e0b",
+  sakit: "#ef4444",
+  alfa: "#6b7280",
+};
+
+export default function AttendanceChart({ attendanceData }: AttendanceChartProps) {
   const data = [
-    { day: 1, attendance: 75 },
-    { day: 2, attendance: 78 },
-    { day: 3, attendance: 72 },
-    { day: 4, attendance: 88 },
-    { day: 5, attendance: 85 },
-    { day: 6, attendance: 92 },
-    { day: 7, attendance: 88 },
-    { day: 8, attendance: 95 },
-    { day: 9, attendance: 91 },
-    { day: 10, attendance: 87 },
-    { day: 11, attendance: 82 },
-    { day: 12, attendance: 85 },
-    { day: 13, attendance: 79 },
-    { day: 14, attendance: 84 },
-    { day: 15, attendance: 90 },
-    { day: 16, attendance: 88 },
-    { day: 17, attendance: 93 },
-    { day: 18, attendance: 89 },
-    { day: 19, attendance: 86 },
-    { day: 20, attendance: 91 },
-    { day: 21, attendance: 94 },
-    { day: 22, attendance: 89 },
-    { day: 23, attendance: 87 },
-    { day: 24, attendance: 92 },
-    { day: 25, attendance: 90 },
-    { day: 26, attendance: 85 },
-    { day: 27, attendance: 88 },
-    { day: 28, attendance: 95 },
-    { day: 29, attendance: 93 },
-    { day: 30, attendance: 97 },
+    { name: "Hadir", value: attendanceData?.hadir ?? 0, color: COLORS.hadir },
+    { name: "Izin", value: attendanceData?.izin ?? 0, color: COLORS.izin },
+    { name: "Sakit", value: attendanceData?.sakit ?? 0, color: COLORS.sakit },
+    { name: "Alfa", value: attendanceData?.alfa ?? 0, color: COLORS.alfa },
   ];
+
+  const hadirPercentage = attendanceData?.hadirPercentage ?? 0;
+  const period = attendanceData?.period?.month ?? "N/A";
 
   return (
     <Card className="p-6 bg-white">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            Grafik Statistik Kehadiran (30 Hari Terakhir)
+            Statistik Kehadiran
           </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Periode: {period}
+          </p>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-gray-900">95%</span>
-          <span className="text-sm text-green-600">+2.5%</span>
+          <span className="text-3xl font-bold text-gray-900">{hadirPercentage}%</span>
+          <span className="text-sm text-gray-600">Hadir</span>
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis
-            dataKey="day"
-            stroke="#999"
-            style={{ fontSize: "12px" }}
-            tick={{ fontSize: 12 }}
-          />
-          <YAxis stroke="#999" style={{ fontSize: "12px" }} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="attendance"
-            stroke="#3b82f6"
-            dot={false}
-            strokeWidth={3}
-            isAnimationActive={true}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* Pie Chart */}
+        <div className="flex justify-center">
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                fill="#8884d8"
+                paddingAngle={2}
+                dataKey="value"
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => `${value} orang`}
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  padding: "8px 12px"
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Legend */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-100">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 rounded-full bg-green-500"></div>
+              <span className="text-sm font-medium text-gray-700">Hadir</span>
+            </div>
+            <span className="text-sm font-bold text-gray-900">
+              {attendanceData?.hadir ?? 0} <span className="text-green-600">({attendanceData?.hadirPercentage ?? 0}%)</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-100">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 rounded-full bg-amber-500"></div>
+              <span className="text-sm font-medium text-gray-700">Izin</span>
+            </div>
+            <span className="text-sm font-bold text-gray-900">
+              {attendanceData?.izin ?? 0} <span className="text-amber-600">({attendanceData?.izinPercentage ?? 0}%)</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-100">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 rounded-full bg-red-500"></div>
+              <span className="text-sm font-medium text-gray-700">Sakit</span>
+            </div>
+            <span className="text-sm font-bold text-gray-900">
+              {attendanceData?.sakit ?? 0} <span className="text-red-600">({attendanceData?.sakitPercentage ?? 0}%)</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 rounded-full bg-gray-500"></div>
+              <span className="text-sm font-medium text-gray-700">Alfa</span>
+            </div>
+            <span className="text-sm font-bold text-gray-900">
+              {attendanceData?.alfa ?? 0} <span className="text-gray-600">({attendanceData?.alfaPercentage ?? 0}%)</span>
+            </span>
+          </div>
+          <div className="pt-3 mt-3 border-t-2 border-gray-200">
+            <div className="flex items-center justify-between">
+              <span className="text-base font-bold text-gray-700">Total Kehadiran</span>
+              <span className="text-lg font-bold text-blue-600">
+                {attendanceData?.total ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 }

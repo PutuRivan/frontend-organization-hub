@@ -11,36 +11,38 @@ interface StatCard {
   subtext?: string;
 }
 
-export default function DashboardStats() {
+interface DashboardStatsProps {
+  countData?: {
+    user: number;
+    inventory: number;
+    events: number;
+  };
+}
+
+export default function DashboardStats({ countData }: DashboardStatsProps) {
   const stats: StatCard[] = [
     {
       title: "Total Personal",
-      value: 125,
+      value: countData?.user ?? 0,
       icon: <Users className="h-6 w-6 text-blue-500" />,
       subtext: "Active employees",
     },
     {
-      title: "Kehadiran Hari Ini",
-      value: 95,
-      icon: <Calendar className="h-6 w-6 text-blue-500" />,
-      subtext: "%",
-    },
-    {
       title: "Jumlah Barang",
-      value: 842,
+      value: countData?.inventory ?? 0,
       icon: <Package className="h-6 w-6 text-blue-500" />,
       subtext: "Inventory items",
     },
     {
       title: "Kegiatan Mendatang",
-      value: 5,
+      value: countData?.events ?? 0,
       icon: <Clock className="h-6 w-6 text-blue-500" />,
-      subtext: "Upcoming activities",
+      subtext: "Upcoming events",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat, index) => (
         <Card key={index} className="p-6 bg-white">
           <div className="flex items-start justify-between">
