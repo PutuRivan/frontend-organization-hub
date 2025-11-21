@@ -4,9 +4,10 @@ export type TUser = {
   email: string;
   image: string;
   role: string;
-  position: string
-  created_at: string
-  update_at: string
+  position: string;
+  status?: "Aktif" | "Nonaktif";
+  created_at: string;
+  update_at: string;
 };
 
 export type TAttendanceStatus = "Hadir" | "Izin" | "Alfa" | "Sakit";

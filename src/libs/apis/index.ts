@@ -180,3 +180,21 @@ export async function createAttendance(
   return responseData;
 }
 
+export async function getAllPersonel(
+  token: string,
+  page: number = 1,
+  userPerPage: number = 10
+) {
+  const parsedToken = JSON.parse(token)
+
+  const res = await fetch(`${API_URL}/users/personel?page=${page}&limit=${userPerPage}`, {
+    cache: 'no-store',
+    headers: {
+      Authorization: `Bearer ${parsedToken}`
+    }
+  })
+
+  if (!res.ok) throw new Error("Gagal Mengambil Data User")
+
+  return await res.json()
+}
