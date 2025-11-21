@@ -10,7 +10,7 @@ import HeaderContent from "@/components/dashboard/base/header-content";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Event {
   id: string;
@@ -23,7 +23,6 @@ export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date(2023, 11, 1));
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const [view, setView] = useState<"calendar" | "list">("calendar");
   const [events, setEvents] = useState<Event[]>([
     {
       id: "1",
@@ -103,7 +102,7 @@ export default function Home() {
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Cari kegiatan..."
               value={searchQuery}
@@ -112,23 +111,16 @@ export default function Home() {
             />
           </div>
         </div>
-
-        <Tabs
-          value={view}
-          onValueChange={(v) => setView(v as "calendar" | "list")}
-        >
-          <TabsList>
-            <TabsTrigger value="calendar">Tampilan Kalender</TabsTrigger>
-            <TabsTrigger value="list">Tampilan Daftar</TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
+      <Tabs defaultValue="calendar">
+        <TabsList>
+          <TabsTrigger value="calendar">Tampilan Kalender</TabsTrigger>
+          <TabsTrigger value="list">Tampilan Daftar</TabsTrigger>
+        </TabsList>
 
-      {/* Content */}
-      <Card className="p-6">
-        {view === "calendar" ? (
-          <>
-            {/* Calendar Header */}
+        {/* Content */}
+        <Card className="p-6">
+          <TabsContent value="calendar">
             <EventCalendarHeader
               handleNextMonth={handleNextMonth}
               handlePreviousMonth={handlePreviousMonth}
@@ -141,11 +133,13 @@ export default function Home() {
               currentDate={currentDate}
               events={filteredEvents}
             />
-          </>
-        ) : (
-          <EventList events={filteredEvents} />
-        )}
-      </Card>
+          </TabsContent>
+
+          <TabsContent value="list">
+            <EventList events={filteredEvents} />
+          </TabsContent>
+        </Card>
+      </Tabs>
 
       <AddEventDialog
         open={showAddEvent}

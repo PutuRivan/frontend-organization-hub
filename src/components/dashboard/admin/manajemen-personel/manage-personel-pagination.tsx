@@ -1,15 +1,19 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface PersonnelPaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+interface ManagePersonelPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export default function PersonnelPagination({ currentPage, totalPages, onPageChange }: PersonnelPaginationProps) {
+export default function ManagePersonelPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: ManagePersonelPaginationProps) {
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -44,5 +48,5 @@ export default function PersonnelPagination({ currentPage, totalPages, onPageCha
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }
