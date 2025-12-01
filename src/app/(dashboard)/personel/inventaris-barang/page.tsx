@@ -1,105 +1,95 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { InventoryHeader } from "@/components/dashboard/personel/inventaris-barang/inventory-header"
-import { InventoryFilters } from "@/components/dashboard/personel/inventaris-barang/inventory-filters"
-import { InventoryTable } from "@/components/dashboard/personel/inventaris-barang/inventory-table"
-import { InventoryPagination } from "@/components/dashboard/personel/inventaris-barang/inventory-pagination"
-import type { InventoryItem } from "@/components/dashboard/personel/inventaris-barang"
-
-const inventoryData: InventoryItem[] = [
-  {
-    id: "1",
-    name: "Laptop Dell XPS 15",
-    code: "AST-2023-001",
-    category: "Elektronik",
-    location: "Gudang A",
-    dateAdded: "2023-01-15",
-    condition: "Baik",
-  },
-  {
-    id: "2",
-    name: "Proyektor Epson EB-S41",
-    code: "AST-2023-002",
-    category: "Elektronik",
-    location: "Ruang Meeting Lt. 2",
-    dateAdded: "2023-02-20",
-    condition: "Perlu Perbaikan",
-  },
-  {
-    id: "3",
-    name: "Kursi Kantor Ergonomis",
-    code: "AST-2023-003",
-    category: "Furnitur",
-    location: "Area Kerja",
-    dateAdded: "2023-03-10",
-    condition: "Baik",
-  },
-  {
-    id: "4",
-    name: "Keyboard Mechanical",
-    code: "AST-2023-004",
-    category: "Aksesoris Komputer",
-    location: "Stok Gudang B",
-    dateAdded: "2023-04-05",
-    condition: "Rusak",
-  },
-  {
-    id: "5",
-    name: "Whiteboard Magnetik",
-    code: "AST-2023-005",
-    category: "Perlengkapan Kantor",
-    location: "Ruang Diskusi",
-    dateAdded: "2023-05-12",
-    condition: "Baik",
-  },
-]
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import InventoryPagination from "@/components/dashboard/admin/inventaris-barang/inventory-pagination";
+import InventoryTable from "@/components/dashboard/admin/inventaris-barang/inventory-table";
+import SearchBar from "@/components/dashboard/admin/inventaris-barang/search-bar";
+import HeaderContent from "@/components/dashboard/base/header-content";
+import { getInventory } from "@/libs/apis";
+import type { TInventory } from "@/libs/types";
+import { getAccessTokenFromCookie } from "@/libs/utils";
 
 export default function InventoryPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCondition, setSelectedCondition] = useState("Semua Kondisi")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [items, setItems] = useState<TInventory[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
+  const itemsPerPage = 10;
+  const token = getAccessTokenFromCookie();
 
-  const filteredData = inventoryData.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCondition = selectedCondition === "Semua Kondisi" || item.condition === selectedCondition
-    return matchesSearch && matchesCondition
-  })
+  const fetchInventory = useCallback(
+    async (page: number) => {
+      try {
+        setLoading(true);
+        const result = await getInventory(token, page, itemsPerPage);
 
-  const handleSearchChange = (term: string) => {
-    setSearchTerm(term)
-    setCurrentPage(1)
-  }
+        setItems(result.data || []);
+        setTotalItems(result.pagination?.totalItems || 0);
+        setTotalPages(result.pagination?.totalPages || 1);
+      } catch (err) {
+        console.error(err);
+        toast.error("Terjadi Kesalahan saat Mengambil Data");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token],
+  );
 
-  const handleConditionChange = (condition: string) => {
-    setSelectedCondition(condition)
-    setCurrentPage(1)
-  }
+  useEffect(() => {
+    fetchInventory(currentPage);
+  }, [fetchInventory, currentPage]);
 
-  const itemsPerPage = 5
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage)
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) return items;
+
+    const normalizedQuery = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      item.item_name.toLowerCase().includes(normalizedQuery),
+    );
+  }, [items, searchTerm]);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-7xl">
-        <InventoryHeader />
-        <InventoryFilters
-          onSearchChange={handleSearchChange}
-          onConditionChange={handleConditionChange}
-          selectedCondition={selectedCondition}
-        />
-        <InventoryTable data={paginatedData} />
-        <InventoryPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsShowing={paginatedData.length}
-          itemsPerPage={itemsPerPage}
-          totalItems={filteredData.length}
-          onPageChange={setCurrentPage}
-        />
+    <main className="min-h-screen bg-background px-5">
+      <HeaderContent
+        title="Inventaris Barang"
+        description="Lihat dan kelola daftar inventaris yang tersedia."
+      />
+      {/* Search */}
+      <div className="mb-6 flex justify-between">
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
       </div>
+
+      {/* Table */}
+      {loading ? (
+        <p className="text-center text-muted-foreground py-10">
+          Memuat data...
+        </p>
+      ) : (
+        <InventoryTable
+          items={filteredItems}
+          pathname={pathname}
+          token={token}
+          fetchInventory={fetchInventory}
+          page={currentPage}
+        />
+      )}
+
+      {/* Pagination Info */}
+      <InventoryPagination
+        currentPage={currentPage}
+        filteredItems={filteredItems}
+        itemsPerPage={itemsPerPage}
+        searchTerm={searchTerm}
+        setCurrentPage={setCurrentPage}
+        totalItems={totalItems}
+        totalPages={totalPages}
+      />
     </main>
-  )
+  );
 }

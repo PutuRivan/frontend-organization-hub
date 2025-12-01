@@ -1,57 +1,104 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import type { TInventory } from "@/libs/types";
 
 interface InventoryPaginationProps {
+  searchTerm: string;
+  filteredItems: TInventory[];
   currentPage: number
-  totalPages: number
-  itemsShowing: number
   itemsPerPage: number
   totalItems: number
-  onPageChange: (page: number) => void
+  totalPages: number
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export function InventoryPagination({
+export default function InventoryPagination({
+  searchTerm,
+  filteredItems,
   currentPage,
-  totalPages,
-  itemsShowing,
   itemsPerPage,
   totalItems,
-  onPageChange,
+  totalPages,
+  setCurrentPage
 }: InventoryPaginationProps) {
-  const startIndex = (currentPage - 1) * itemsPerPage + 1
-
   return (
-    <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
-      <p className="text-sm text-gray-600">
-        Menampilkan {startIndex}-{Math.min(startIndex + itemsPerPage - 1, totalItems)} dari {totalItems}
+    <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <p className="text-sm text-muted-foreground w-full">
+        {searchTerm.trim()
+          ? `${filteredItems.length} hasil ditemukan`
+          : `Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems} items`}
       </p>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </Button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <Button
-            key={page}
-            variant={currentPage === page ? "default" : "outline"}
-            onClick={() => onPageChange(page)}
-            className="w-10"
-          >
-            {page}
-          </Button>
-        ))}
-        <Button
-          variant="outline"
-          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </Button>
-      </div>
+
+      {/* Pagination */}
+      <Pagination className="justify-end">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentPage(Math.max(1, currentPage - 1));
+              }}
+              className={
+                currentPage === 1 ? "pointer-events-none opacity-50" : ""
+              }
+            />
+          </PaginationItem>
+
+          {(() => {
+            const visiblePages = 5; // jumlah halaman yang ingin ditampilkan
+            let startPage = Math.max(
+              1,
+              currentPage - Math.floor(visiblePages / 2),
+            );
+            let endPage = startPage + visiblePages - 1;
+
+            if (endPage > totalPages) {
+              endPage = totalPages;
+              startPage = Math.max(1, endPage - visiblePages + 1);
+            }
+
+            return Array.from(
+              { length: endPage - startPage + 1 },
+              (_, i) => startPage + i,
+            ).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ));
+          })()}
+
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentPage(Math.min(totalPages, currentPage + 1));
+              }}
+              className={
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
-  )
+  );
 }

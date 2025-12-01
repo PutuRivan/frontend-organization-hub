@@ -1,9 +1,9 @@
+import { cookies } from "next/headers";
 import AttendanceChart from "@/components/dashboard/admin/home/attendance-chart";
 import DashboardStats from "@/components/dashboard/admin/home/dashboard-stats";
 import InventorySummary from "@/components/dashboard/admin/home/inventory-summary";
 import UpcomingActivities from "@/components/dashboard/admin/home/upcoming-activities";
 import { countTable } from "@/libs/apis";
-import { cookies } from "next/headers";
 
 export default async function page() {
   const token = (await cookies()).get("access_token")?.value;
@@ -32,4 +32,3 @@ export default async function page() {
     </main>
   );
 }
-

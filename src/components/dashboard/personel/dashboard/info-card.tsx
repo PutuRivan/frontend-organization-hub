@@ -29,7 +29,7 @@ export function InfoCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-5">
       {cards.map((card, idx) => (
         <Card key={idx} className="border border-border">
           <CardHeader className="pb-3">

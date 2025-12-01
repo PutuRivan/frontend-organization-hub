@@ -2,7 +2,7 @@ export type TUser = {
   id: string;
   name: string;
   email: string;
-  image: string;
+  image: string | null;
   role: string;
   position: string;
   status?: "Aktif" | "Nonaktif";
