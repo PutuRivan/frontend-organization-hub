@@ -25,22 +25,38 @@ export default function EventCalendarGrid({ currentDate, events }: CalendarGridP
   const lastDayOfMonth = lastDay.getDate()
   const prevLastDayOfMonth = prevLastDay.getDate()
 
-  const days: (number | null)[] = []
+  // Generate calendar days including previous and next month
+  const calendarDays: Array<{ day: number; isCurrentMonth: boolean; isPrevMonth: boolean; isNextMonth: boolean }> = []
 
   // Previous month days
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    days.push(-(prevLastDayOfMonth - i))
+    calendarDays.push({
+      day: prevLastDayOfMonth - i,
+      isCurrentMonth: false,
+      isPrevMonth: true,
+      isNextMonth: false,
+    })
   }
 
   // Current month days
   for (let i = 1; i <= lastDayOfMonth; i++) {
-    days.push(i)
+    calendarDays.push({
+      day: i,
+      isCurrentMonth: true,
+      isPrevMonth: false,
+      isNextMonth: false,
+    })
   }
 
-  // Next month days
-  const remainingDays = 42 - days.length
+  // Next month days (fill to make 42 cells - 6 rows)
+  const remainingDays = 42 - calendarDays.length
   for (let i = 1; i <= remainingDays; i++) {
-    days.push(-(lastDayOfMonth + i))
+    calendarDays.push({
+      day: i,
+      isCurrentMonth: false,
+      isPrevMonth: false,
+      isNextMonth: true,
+    })
   }
 
   const getEventsForDate = (date: Date) => {
@@ -53,7 +69,6 @@ export default function EventCalendarGrid({ currentDate, events }: CalendarGridP
   }
 
   const isToday = (day: number) => {
-    if (day <= 0) return false
     const today = new Date()
     return day === today.getDate() && month === today.getMonth() && year === today.getFullYear()
   }
@@ -84,27 +99,34 @@ export default function EventCalendarGrid({ currentDate, events }: CalendarGridP
 
       {/* Calendar Cells */}
       <div className="grid grid-cols-7 gap-2">
-        {days.map((day, index) => {
-          const isCurrentMonth = day > 0
-          const displayDay = Math.abs(day)
-          const dateObj = new Date(year, month, isCurrentMonth ? day : day * -1)
+        {calendarDays.map((dayInfo, index) => {
+          const { day, isCurrentMonth, isPrevMonth, isNextMonth } = dayInfo
+
+          // Calculate the actual date for this cell
+          let cellMonth = month
+          if (isPrevMonth) cellMonth = month - 1
+          if (isNextMonth) cellMonth = month + 1
+
+          const dateObj = new Date(year, cellMonth, day)
           const dayEvents = isCurrentMonth ? getEventsForDate(dateObj) : []
-          const today = isToday(day)
+          const today = isCurrentMonth && isToday(day)
 
           return (
             <div
               key={index}
-              className={`min-h-24 p-3 border rounded-lg ${
-                isCurrentMonth ? "bg-card text-foreground" : "bg-muted text-muted-foreground"
-              }`}
+              className={`min-h-24 p-3 border rounded-lg ${isCurrentMonth
+                ? "bg-card text-foreground"
+                : "bg-muted/50 text-muted-foreground"
+                }`}
             >
               <div className="flex flex-col h-full">
                 <div
-                  className={`text-sm font-semibold mb-2 ${
-                    today ? "w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center" : ""
-                  }`}
+                  className={`text-sm font-semibold mb-2 ${today
+                    ? "w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center"
+                    : ""
+                    }`}
                 >
-                  {displayDay}
+                  {day}
                 </div>
                 <div className="space-y-1 flex-1">
                   {dayEvents.slice(0, 2).map((event) => (

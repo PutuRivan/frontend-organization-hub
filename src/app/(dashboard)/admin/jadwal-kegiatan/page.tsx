@@ -2,15 +2,15 @@
 
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import EventAddDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-add-dialog";
 import EventCalendarHeader from "@/components/dashboard/admin/jadwal-kegiatan/event-calendar-header";
 import EventCalendarGrid from "@/components/dashboard/admin/jadwal-kegiatan/event-calender-grid";
+import EventFilterContainer from "@/components/dashboard/admin/jadwal-kegiatan/event-filter-container";
 import EventList from "@/components/dashboard/admin/jadwal-kegiatan/event-list";
 import HeaderContent from "@/components/dashboard/base/header-content";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EventFilterContainer from "@/components/dashboard/admin/jadwal-kegiatan/event-filter-container";
-import EventAddDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-add-dialog";
 import { getAllEvents } from "@/libs/apis";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 
@@ -58,7 +58,7 @@ export default function Home() {
         token,
         currentPage,
         itemsPerPage,
-        searchQuery
+        searchQuery,
       );
       setEvents(result.data);
       setTotalItems(result.pagination.totalItems);
@@ -98,6 +98,10 @@ export default function Home() {
     setCurrentDate(new Date());
   };
 
+  const handleDateChange = (year: number, month: number) => {
+    setCurrentDate(new Date(year, month, 1));
+  };
+
   const handleAddEvent = (title: string, date: Date, category: string) => {
     // TODO: Implement API call to create event
     console.log("Add event:", { title, date, category });
@@ -105,11 +109,6 @@ export default function Home() {
     // Refresh events after adding
     fetchEvents();
   };
-
-  const monthName = currentDate.toLocaleDateString("id-ID", {
-    month: "long",
-    year: "numeric",
-  });
 
   return (
     <main className="min-h-screen bg-background px-5">
@@ -146,10 +145,11 @@ export default function Home() {
             <>
               <TabsContent value="calendar">
                 <EventCalendarHeader
+                  currentDate={currentDate}
                   handleNextMonth={handleNextMonth}
                   handlePreviousMonth={handlePreviousMonth}
                   handleToday={handleToday}
-                  monthName={monthName}
+                  onDateChange={handleDateChange}
                 />
 
                 {/* Calendar Grid */}
