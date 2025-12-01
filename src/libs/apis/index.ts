@@ -215,6 +215,27 @@ export async function getAllPersonel(
   return await res.json()
 }
 
+export async function createPersonel(
+  token: string,
+  formData: FormData
+) {
+  const parsedToken = JSON.parse(token)
+
+  const res = await fetch(`${API_URL}/user`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: formData,
+  })
+
+  const responseData = await res.json()
+
+  if (!res.ok) throw new Error("Gagal Membuat Data User")
+
+  return responseData
+}
+
 export async function getAllEvents(
   token: string,
   page: number = 1,

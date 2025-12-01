@@ -1,15 +1,15 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import type { TUserLoginSchema } from "@/libs/schema";
 import type { TUser } from "@/libs/types";
-import { TUserLoginSchema } from "@/libs/schema";
 
 export const AuthContext = createContext(
   {} as {
     user: TUser | null;
-    authenticated: boolean
-    token: string
-    loading: boolean
+    authenticated: boolean;
+    token: string;
+    loading: boolean;
     login: ({ email, password }: TUserLoginSchema) => void;
     logout: () => void;
   },

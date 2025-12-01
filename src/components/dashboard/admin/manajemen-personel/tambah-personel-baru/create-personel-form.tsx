@@ -1,36 +1,51 @@
-'use client'
+"use client";
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/shadcn-io/dropzone'
-import ImagePreview from '../../inventaris-barang/create/image-preview'
-import { useState } from 'react'
-import { personelSchema, TPersonelSchema } from '@/libs/schema'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "@/components/ui/shadcn-io/dropzone";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/context/auth-context";
+import { createPersonel } from "@/libs/apis";
+import { personelSchema, type TPersonelSchema } from "@/libs/schema";
+import { getAccessTokenFromCookie } from "@/libs/utils";
+import ImagePreview from "../../inventaris-barang/create/image-preview";
 
-export default function PersonnelForm() {
+export default function CreatePersonelForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false)
-
+  const [loading, setLoading] = useState<boolean>(false);
+  const { user } = useAuth();
+  const token = getAccessTokenFromCookie();
   const form = useForm<TPersonelSchema>({
     resolver: zodResolver(personelSchema),
     defaultValues: {
-      nama: '',
-      nrp: '',
-      jabatan: '',
-      pangkat: '',
-      password: '',
+      nama: "",
+      nrp: "",
+      jabatan: "",
+      pangkat: "",
+      password: "",
       image: null,
-      email: '',
-      role: 'Personel',
-      status: true
+      email: "",
+      role: "",
+      status: true,
     },
-  })
+  });
 
   const handleDrop = (acceptedFiles: File[]) => {
     const newFiles = [...files, ...acceptedFiles];
@@ -52,13 +67,42 @@ export default function PersonnelForm() {
   };
 
   const onSubmit = async (values: TPersonelSchema) => {
-    setLoading(true)
-    console.log('Form submitted:', values)
-    setLoading(false)
-  }
+    if (!user?.id) return;
+    console.log(values);
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("nama", values.nama);
+    formData.append("nrp", values.nrp);
+    formData.append("jabatan", values.jabatan);
+    formData.append("pangkat", values.pangkat);
+    formData.append("password", values.password);
+    formData.append("email", values.email);
+    formData.append("role", "Personel");
+
+    if (values.status) {
+      formData.append("status", "Aktif");
+    } else {
+      formData.append("status", "Tidak_Aktif");
+    }
+
+    files.forEach((file) => {
+      formData.append("image", file);
+    });
+    formData.append("userId", user.id);
+    try {
+      const data = await createPersonel(token, formData);
+      console.log(data);
+      toast.success("Personel berhasil ditambahkan");
+    } catch (error) {
+      toast.error("Terjadi kesalahan saat submit");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Form {...form} >
+    <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid gap-4 md:grid-cols-2">
           {/* Nama Lengkap */}
@@ -139,7 +183,11 @@ export default function PersonnelForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="email@domain.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="email@domain.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,7 +198,7 @@ export default function PersonnelForm() {
         {/* Foto Personel */}
         <FormField
           control={form.control}
-          name='image'
+          name="image"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Upload Foto Personel</FormLabel>
@@ -207,5 +255,5 @@ export default function PersonnelForm() {
         </div>
       </form>
     </Form>
-  )
+  );
 }

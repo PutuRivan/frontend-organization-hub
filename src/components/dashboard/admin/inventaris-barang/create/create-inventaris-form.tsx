@@ -75,8 +75,6 @@ export default function CreateInventarisForm() {
   };
 
   const onSubmit = async (values: TCreateInventory) => {
-    console.log(values);
-
     if (!user?.id) return;
 
     setIsLoading(true);
