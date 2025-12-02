@@ -215,6 +215,23 @@ export async function getAllPersonel(
   return await res.json()
 }
 
+export async function getPersonelById(
+  token: string,
+  id: string
+) {
+  const parsedToken = JSON.parse(token)
+
+  const res = await fetch(`${API_URL}/user/personel/${id}`, {
+    headers: {
+      Authorization: `Bearer ${parsedToken}`
+    }
+  })
+
+  if (!res.ok) throw new Error("Gagal Mengambil Data User")
+
+  return await res.json()
+}
+
 export async function createPersonel(
   token: string,
   formData: FormData
@@ -234,6 +251,22 @@ export async function createPersonel(
   if (!res.ok) throw new Error("Gagal Membuat Data User")
 
   return responseData
+}
+
+export async function deletePersonel(token: string, id: string) {
+  const parsedToken = JSON.parse(token)
+
+  const res = await fetch(`${API_URL}/user/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Gagal Menghapus Data User")
+
+  return res
 }
 
 export async function getAllEvents(

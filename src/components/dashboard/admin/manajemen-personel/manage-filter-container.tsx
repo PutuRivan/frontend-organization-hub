@@ -15,7 +15,7 @@ interface ManageFilterContainerProps {
   statusFilter: string;
   setSearchQuery: React.Dispatch<SetStateAction<string>>;
   setCurrentPage: React.Dispatch<SetStateAction<number>>;
-  setStatusFilter: React.Dispatch<SetStateAction<"Semua" | "Aktif" | "Nonaktif">>;
+  setStatusFilter: React.Dispatch<SetStateAction<"Semua" | "Aktif" | "Tidak_Aktif">>;
 }
 
 export default function ManageFilterContainer({
@@ -44,7 +44,7 @@ export default function ManageFilterContainer({
       <div className="w-full md:w-48">
         <Select
           value={statusFilter}
-          onValueChange={(value: "Semua" | "Aktif" | "Nonaktif") => {
+          onValueChange={(value: "Semua" | "Aktif" | "Tidak_Aktif") => {
             setStatusFilter(value);
             setCurrentPage(1);
           }}

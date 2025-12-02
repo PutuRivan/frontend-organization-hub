@@ -1,11 +1,14 @@
+export type TStatus = "Aktif" | "Tidak_Aktif";
+
 export type TUser = {
   id: string;
   name: string;
   email: string;
   image: string | null;
+  jabatan: string;
   role: string;
   position: string;
-  status?: "Aktif" | "Nonaktif";
+  status?: TStatus;
   created_at: string;
   update_at: string;
 };

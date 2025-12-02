@@ -27,7 +27,11 @@ import { personelSchema, type TPersonelSchema } from "@/libs/schema";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 import ImagePreview from "../../inventaris-barang/create/image-preview";
 
-export default function CreatePersonelForm() {
+interface IUpdatePersonelForm {
+  data: TPersonelSchema;
+}
+
+export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,15 +41,15 @@ export default function CreatePersonelForm() {
   const form = useForm<TPersonelSchema>({
     resolver: zodResolver(personelSchema),
     defaultValues: {
-      name: "",
-      nrp: "",
-      jabatan: "",
-      pangkat: "",
+      name: data.name,
+      nrp: data.nrp,
+      jabatan: data.jabatan,
+      pangkat: data.pangkat,
       password: "",
       image: null,
-      email: "",
-      role: "",
-      status: true,
+      email: data.email,
+      role: data.role,
+      status: data.status,
     },
   });
 
@@ -103,7 +107,6 @@ export default function CreatePersonelForm() {
       setLoading(false);
     }
   };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
