@@ -16,32 +16,43 @@ export type TUser = {
 export type TAttendanceStatus = "Hadir" | "Izin" | "Alfa" | "Sakit";
 
 export type TAttandance = {
-  id: string
+  id: string;
   date: string;
   time_in: string | null;
   time_out: string | null;
-  status: TAttendanceStatus
+  status: TAttendanceStatus;
   note: string | null;
   created_at: string;
   updated_at: string;
-  user: TUser
-}
+  user: TUser;
+};
 
 export type TItemCondition = "Baik" | "Rusak" | "Hilang";
 
 export type TInventory = {
-  id: string
-  item_name: string
-  quantity: number
-  quantity_description: string
-  category: TItemCondition
-  location: string
-  description: string
-  image: string
-  updated_by: string
-  created_at: Date
-  updated_at: Date
-}
+  id: string;
+  item_name: string;
+  quantity: number;
+  quantity_description: string;
+  category: TItemCondition;
+  location: string;
+  description: string;
+  image: string;
+  updated_by: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type TEvent = {
+  id: string;
+  name: string;
+  place: string;
+  leader: string;
+  category: string;
+  dress_code: string;
+  start_datetime: string;
+  end_datetime: string;
+};
 
 export type TTokenCheckResponse = {
   dataToken: {

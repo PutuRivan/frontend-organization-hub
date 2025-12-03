@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Calendar, CalendarCheck, Command, FileText, Home, UsersRound } from "lucide-react";
+import { Archive, Calendar, CalendarCheck, Command, Home, UsersRound } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import {
@@ -17,11 +17,6 @@ import Navmain from "./nav-main";
 import NavUser from "./nav-user";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   main: [
     {
       name: "Dashboard",
@@ -88,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Navmain projects={filteredMenu} role={user?.role} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

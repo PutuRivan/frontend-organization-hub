@@ -15,18 +15,7 @@ import {
 } from "@/components/ui/table";
 import { deletePersonnelAction } from "@/libs/action";
 import type { TUser } from "@/libs/types";
-
-const getInitials = (name: string): string => {
-  if (!name) return "";
-  const parts = name.split(" ").filter((part) => part.length > 0);
-
-  if (parts.length === 1) {
-    return parts[0][0].toUpperCase();
-  } else if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return "";
-};
+import { getInitials } from "@/libs/utils";
 
 interface ManagePersonelTableProps {
   personnel: TUser[];

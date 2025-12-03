@@ -1,23 +1,16 @@
 "use client";
 
 import { Calendar } from "lucide-react";
-import type React from "react";
 import { Card } from "@/components/ui/card";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  start_datetime: string;
-  end_datetime: string;
-}
+import type { TEvent } from "@/libs/types";
 
 interface UpcomingActivitiesProps {
-  events: Event[];
+  events: TEvent[];
 }
 
-export default function UpcomingActivities({ events }: UpcomingActivitiesProps) {
+export default function UpcomingActivities({
+  events,
+}: UpcomingActivitiesProps) {
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     const dateStr = date.toLocaleDateString("id-ID", {
@@ -54,12 +47,14 @@ export default function UpcomingActivities({ events }: UpcomingActivitiesProps) 
                   <Calendar className="h-5 w-5 text-blue-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{event.title}</p>
+                  <p className="font-medium text-gray-900">{event.name}</p>
                   <p className="text-xs text-gray-600">
                     {dateStr}, {timeStr}
                   </p>
-                  {event.location && (
-                    <p className="text-xs text-gray-500 mt-1">📍 {event.location}</p>
+                  {event.place && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      📍 {event.place}
+                    </p>
                   )}
                 </div>
               </div>

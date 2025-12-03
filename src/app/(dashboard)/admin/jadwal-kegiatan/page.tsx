@@ -11,26 +11,10 @@ import HeaderContent from "@/components/dashboard/base/header-content";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCalendarView } from "@/hooks/use-calendar-view";
 import { getAllEvents } from "@/libs/apis";
+import type { TEvent } from "@/libs/types";
 import { getAccessTokenFromCookie } from "@/libs/utils";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  start_datetime: string;
-  end_datetime: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-  createdBy: {
-    id: string;
-    name: string;
-    email: string;
-    position: string;
-  };
-}
 
 interface EventForCalendar {
   id: string;
@@ -40,13 +24,19 @@ interface EventForCalendar {
 }
 
 export default function Home() {
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<TEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const {
+    currentDate,
+    handleNextMonth,
+    handlePreviousMonth,
+    handleToday,
+    handleDateChange,
+  } = useCalendarView();
   const itemsPerPage = 10;
 
   const token = getAccessTokenFromCookie();
@@ -76,31 +66,11 @@ export default function Home() {
   const calendarEvents: EventForCalendar[] = useMemo(() => {
     return events.map((event) => ({
       id: event.id,
-      title: event.title,
+      title: event.name,
       date: new Date(event.start_datetime),
       category: "meeting" as const, // Default category, can be enhanced later
     }));
   }, [events]);
-
-  const handlePreviousMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
-    );
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
-    );
-  };
-
-  const handleToday = () => {
-    setCurrentDate(new Date());
-  };
-
-  const handleDateChange = (year: number, month: number) => {
-    setCurrentDate(new Date(year, month, 1));
-  };
 
   const handleAddEvent = (title: string, date: Date, category: string) => {
     // TODO: Implement API call to create event
@@ -116,11 +86,7 @@ export default function Home() {
         title="Kalender Kegiatan"
         description="Kelola semua kegiatan dan rapat di satu tempat."
       >
-        <Button
-          onClick={() => setShowAddEvent(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto"
-          size="lg"
-        >
+        <Button onClick={() => setShowAddEvent(true)} size="lg">
           <Plus className="mr-2 h-5 w-5" />
           Tambah Kegiatan
         </Button>
