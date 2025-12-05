@@ -72,14 +72,6 @@ export default function Home() {
     }));
   }, [events]);
 
-  const handleAddEvent = (title: string, date: Date, category: string) => {
-    // TODO: Implement API call to create event
-    console.log("Add event:", { title, date, category });
-    setShowAddEvent(false);
-    // Refresh events after adding
-    fetchEvents();
-  };
-
   return (
     <main className="min-h-screen bg-background px-5">
       <HeaderContent
@@ -136,7 +128,6 @@ export default function Home() {
       <EventAddDialog
         open={showAddEvent}
         onOpenChange={setShowAddEvent}
-        onAddEvent={handleAddEvent}
       />
     </main>
   );

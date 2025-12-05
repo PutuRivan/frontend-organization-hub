@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AttendanceFilterContainerProps {
   startDate: string;
@@ -23,8 +24,8 @@ export default function AttendanceFilterContainer({
 }: AttendanceFilterContainerProps) {
   return (
     <Card className="p-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-end">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-5 md:items-end">
+        <div className="space-y-2 col-span-2">
           <Label className="text-sm font-medium">Nama Personel</Label>
           <Input
             type="text"
@@ -42,24 +43,32 @@ export default function AttendanceFilterContainer({
           <Label className="text-sm font-medium">Tanggal</Label>
           <Input
             type="date"
-            value={startDate} 
+            value={startDate}
             onChange={(e) => {
               setStartDate(e.target.value);
               setCurrentPage(1);
             }}
           />
         </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Status</Label>
+          <Select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Pilih status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="present">Hadir</SelectItem>
+              <SelectItem value="absent">Tidak Hadir</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Buttons */}
         <Button
-          variant="outline"
+          className="w-full"
           onClick={handleReset}
-          className="flex-1 bg-transparent"
         >
           Reset
-        </Button>
-        <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-          Terapkan Filter
         </Button>
       </div>
     </Card>

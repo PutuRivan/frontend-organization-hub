@@ -45,3 +45,15 @@ export const personelSchema = z.object({
 })
 
 export type TPersonelSchema = z.infer<typeof personelSchema>;
+
+export const eventSchema = z.object({
+  name: z.string(),
+  place: z.string(),
+  leader: z.string().optional(),
+  category: z.string().optional(),
+  dress_code: z.string().optional(),
+  start_date: z.string(),
+  end_date: z.string(),
+})
+
+export type TEventSchema = z.infer<typeof eventSchema>

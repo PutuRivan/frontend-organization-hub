@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { toast } from "sonner";
 import { CheckToken } from "./libs/apis";
 
 export async function proxy(request: NextRequest) {
