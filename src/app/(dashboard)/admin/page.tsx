@@ -12,7 +12,7 @@ export default async function page() {
 
   // Prepare data for components
   const countData = {
-    user: dashboardData?.summary?.totalUsers ?? 0,
+    user: dashboardData?.summary?.totalPersonel ?? 0,
     inventory: dashboardData?.summary?.totalInventoryItems ?? 0,
     events: dashboardData?.upcomingEvents?.length ?? 0,
   };

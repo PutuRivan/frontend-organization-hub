@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, Package, Users } from "lucide-react";
+import { Clock, Package, Users } from "lucide-react";
 import type React from "react";
 import { Card } from "@/components/ui/card";
 
