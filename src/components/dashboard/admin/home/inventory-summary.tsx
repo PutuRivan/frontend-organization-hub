@@ -40,12 +40,15 @@ export default function InventorySummary({ inventoryData }: InventorySummaryProp
   const rusak = inventoryData?.rusak ?? 0;
   const hilang = inventoryData?.hilang ?? 0;
 
+  // Check if inventory is empty
+  const isEmpty = total === 0;
+
   const chartData = [
     {
       category: "inventory",
-      baik: baik,
-      rusak: rusak,
-      hilang: hilang,
+      baik: isEmpty ? 1 : baik,
+      rusak: isEmpty ? 0 : rusak,
+      hilang: isEmpty ? 0 : hilang,
     },
   ];
 
@@ -78,21 +81,21 @@ export default function InventorySummary({ inventoryData }: InventorySummaryProp
             dataKey="baik"
             stackId="a"
             cornerRadius={5}
-            fill="#10b981"
+            fill={isEmpty ? "#9ca3af" : "#10b981"}
             className="stroke-transparent stroke-2"
           />
           <RadialBar
             dataKey="rusak"
             stackId="a"
             cornerRadius={5}
-            fill="#ef4444"
+            fill={isEmpty ? "#9ca3af" : "#ef4444"}
             className="stroke-transparent stroke-2"
           />
           <RadialBar
             dataKey="hilang"
             stackId="a"
             cornerRadius={5}
-            fill="#6b7280"
+            fill={isEmpty ? "#9ca3af" : "#6b7280"}
             className="stroke-transparent stroke-2"
           />
         </RadialBarChart>
@@ -102,21 +105,21 @@ export default function InventorySummary({ inventoryData }: InventorySummaryProp
       <div className="mt-6 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-green-500"></div>
+            <div className={`h-3 w-3 rounded-full ${isEmpty ? 'bg-gray-400' : 'bg-green-500'}`}></div>
             <span className="text-sm text-gray-700">Baik</span>
           </div>
           <span className="text-sm font-semibold text-gray-900">{baik}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500"></div>
+            <div className={`h-3 w-3 rounded-full ${isEmpty ? 'bg-gray-400' : 'bg-red-500'}`}></div>
             <span className="text-sm text-gray-700">Rusak</span>
           </div>
           <span className="text-sm font-semibold text-gray-900">{rusak}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-gray-500"></div>
+            <div className={`h-3 w-3 rounded-full ${isEmpty ? 'bg-gray-400' : 'bg-gray-500'}`}></div>
             <span className="text-sm text-gray-700">Hilang</span>
           </div>
           <span className="text-sm font-semibold text-gray-900">{hilang}</span>

@@ -2,9 +2,12 @@
 
 import {
   Cell,
+  Label,
+  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
+  Text,
   Tooltip,
 } from "recharts";
 import { Card } from "@/components/ui/card";
@@ -38,11 +41,32 @@ const COLORS = {
 };
 
 export default function AttendanceChart({ attendanceData }: AttendanceChartProps) {
+  // Check if attendance data is empty
+  const isEmpty = (attendanceData?.total ?? 0) === 0;
+
+  const GRAY_COLOR = "#9ca3af";
+
   const data = [
-    { name: "Hadir", value: attendanceData?.hadir ?? 0, color: COLORS.hadir },
-    { name: "Izin", value: attendanceData?.izin ?? 0, color: COLORS.izin },
-    { name: "Sakit", value: attendanceData?.sakit ?? 0, color: COLORS.sakit },
-    { name: "Alfa", value: attendanceData?.alfa ?? 0, color: COLORS.alfa },
+    {
+      name: "Hadir",
+      value: isEmpty ? 1 : (attendanceData?.hadir ?? 0),
+      color: isEmpty ? GRAY_COLOR : COLORS.hadir
+    },
+    {
+      name: "Izin",
+      value: isEmpty ? 0 : (attendanceData?.izin ?? 0),
+      color: isEmpty ? GRAY_COLOR : COLORS.izin
+    },
+    {
+      name: "Sakit",
+      value: isEmpty ? 0 : (attendanceData?.sakit ?? 0),
+      color: isEmpty ? GRAY_COLOR : COLORS.sakit
+    },
+    {
+      name: "Alfa",
+      value: isEmpty ? 0 : (attendanceData?.alfa ?? 0),
+      color: isEmpty ? GRAY_COLOR : COLORS.alfa
+    },
   ];
 
   const hadirPercentage = attendanceData?.hadirPercentage ?? 0;
@@ -58,10 +82,6 @@ export default function AttendanceChart({ attendanceData }: AttendanceChartProps
           <p className="text-sm text-gray-600 mt-1">
             Periode: {period}
           </p>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-gray-900">{hadirPercentage}%</span>
-          <span className="text-sm text-gray-600">Hadir</span>
         </div>
       </div>
 
@@ -83,52 +103,78 @@ export default function AttendanceChart({ attendanceData }: AttendanceChartProps
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                      return (
+                        <text
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) - 10}
+                            className="fill-gray-900 text-3xl font-bold"
+                          >
+                            {hadirPercentage}%
+                          </tspan>
+                        </text>
+                      )
+                    }
+                  }}
+                  position="center"
+                />
               </Pie>
-              <Tooltip
-                formatter={(value: number) => `${value} orang`}
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                  padding: "8px 12px"
-                }}
-              />
+              {!isEmpty && (
+                <Tooltip
+                  formatter={(value: number) => `${value} orang`}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    padding: "8px 12px"
+                  }}
+                />
+              )}
+
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Legend */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-100">
+          <div className={`flex items-center justify-between p-3 rounded-lg ${isEmpty ? 'bg-gray-50 border border-gray-100' : 'bg-green-50 border border-green-100'}`}>
             <div className="flex items-center gap-3">
-              <div className="h-4 w-4 rounded-full bg-green-500"></div>
+              <div className={`h-4 w-4 rounded-full bg-green-500`}></div>
               <span className="text-sm font-medium text-gray-700">Hadir</span>
             </div>
             <span className="text-sm font-bold text-gray-900">
-              {attendanceData?.hadir ?? 0} <span className="text-green-600">({attendanceData?.hadirPercentage ?? 0}%)</span>
+              {attendanceData?.hadir ?? 0} <span className={isEmpty ? 'text-gray-600' : 'text-green-600'}>({attendanceData?.hadirPercentage ?? 0}%)</span>
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-100">
+          <div className={`flex items-center justify-between p-3 rounded-lg ${isEmpty ? 'bg-gray-50 border border-gray-100' : 'bg-amber-50 border border-amber-100'}`}>
             <div className="flex items-center gap-3">
-              <div className="h-4 w-4 rounded-full bg-amber-500"></div>
+              <div className={`h-4 w-4 rounded-full bg-amber-500`}></div>
               <span className="text-sm font-medium text-gray-700">Izin</span>
             </div>
             <span className="text-sm font-bold text-gray-900">
-              {attendanceData?.izin ?? 0} <span className="text-amber-600">({attendanceData?.izinPercentage ?? 0}%)</span>
+              {attendanceData?.izin ?? 0} <span className={isEmpty ? 'text-gray-600' : 'text-amber-600'}>({attendanceData?.izinPercentage ?? 0}%)</span>
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-100">
+          <div className={`flex items-center justify-between p-3 rounded-lg ${isEmpty ? 'bg-gray-50 border border-gray-100' : 'bg-red-50 border border-red-100'}`}>
             <div className="flex items-center gap-3">
-              <div className="h-4 w-4 rounded-full bg-red-500"></div>
+              <div className={`h-4 w-4 rounded-full bg-red-500`}></div>
               <span className="text-sm font-medium text-gray-700">Sakit</span>
             </div>
             <span className="text-sm font-bold text-gray-900">
-              {attendanceData?.sakit ?? 0} <span className="text-red-600">({attendanceData?.sakitPercentage ?? 0}%)</span>
+              {attendanceData?.sakit ?? 0} <span className={isEmpty ? 'text-gray-600' : 'text-red-600'}>({attendanceData?.sakitPercentage ?? 0}%)</span>
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
+          <div className={`flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100`}>
             <div className="flex items-center gap-3">
-              <div className="h-4 w-4 rounded-full bg-gray-500"></div>
+              <div className={`h-4 w-4 rounded-full bg-gray-500`}></div>
               <span className="text-sm font-medium text-gray-700">Alfa</span>
             </div>
             <span className="text-sm font-bold text-gray-900">
@@ -138,7 +184,7 @@ export default function AttendanceChart({ attendanceData }: AttendanceChartProps
           <div className="pt-3 mt-3 border-t-2 border-gray-200">
             <div className="flex items-center justify-between">
               <span className="text-base font-bold text-gray-700">Total Kehadiran</span>
-              <span className="text-lg font-bold text-blue-600">
+              <span className={`text-lg font-bold ${isEmpty ? 'text-gray-600' : 'text-blue-600'}`}>
                 {attendanceData?.total ?? 0}
               </span>
             </div>
