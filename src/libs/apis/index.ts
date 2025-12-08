@@ -109,7 +109,7 @@ export async function getAllAttendance(
   token: string,
   page = 1,
   limit = 5,
-  startDate?: string,
+  date?: string,
   name?: string,
   status?: string
 ) {
@@ -118,9 +118,10 @@ export async function getAllAttendance(
   params.append("page", page.toString());
   params.append("limit", limit.toString());
 
-  if (startDate) params.append("startDate", startDate);
+  if (date) params.append("date", date);
   if (name) params.append("name", name);
   if (status) params.append("status", status);
+
   console.log(params.toString())
   try {
     const res = await fetch(`${API_URL}/attendance/personel?${params.toString()}`, {

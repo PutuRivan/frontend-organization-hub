@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/select";
 
 interface AttendanceFilterContainerProps {
-  startDate: string;
+  date: string;
   search: string;
   status: string;
-  setStartDate: React.Dispatch<React.SetStateAction<string>>;
+  setDate: React.Dispatch<React.SetStateAction<string>>;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   setStatus: React.Dispatch<React.SetStateAction<string>>;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
@@ -24,10 +24,10 @@ interface AttendanceFilterContainerProps {
 }
 
 export default function AttendanceFilterContainer({
-  startDate,
+  date,
   search,
   status,
-  setStartDate,
+  setDate,
   setSearch,
   setStatus,
   setCurrentPage,
@@ -57,9 +57,9 @@ export default function AttendanceFilterContainer({
           <Label className="text-sm font-medium">Tanggal</Label>
           <Input
             type="date"
-            value={startDate}
+            value={date}
             onChange={(e) => {
-              setStartDate(e.target.value);
+              setDate(e.target.value);
               setCurrentPage(1);
             }}
           />
@@ -67,6 +67,7 @@ export default function AttendanceFilterContainer({
         <div className="space-y-2">
           <Label className="text-sm font-medium">Status</Label>
           <Select
+            defaultValue="Hadir"
             value={status}
             onValueChange={(value) => {
               setStatus(value);

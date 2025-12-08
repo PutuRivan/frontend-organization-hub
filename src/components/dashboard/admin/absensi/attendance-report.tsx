@@ -1,27 +1,16 @@
 "use client";
 
-import { Download } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { getAllAttendance } from "@/libs/apis";
-import { getAccessTokenFromCookie } from "@/libs/utils";
+import { getAccessTokenFromCookie, getTodayDate } from "@/libs/utils";
 import AttendanceFilterContainer from "./attendance-filter-container";
 import AttendancePagination from "./attendance-pagination";
 import AttendanceTable from "./attendance-table";
 
 export function AttendanceReport() {
-  // Helper function to get today's date in YYYY-MM-DD format
-  const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const [startDate, setStartDate] = useState(getTodayDate());
+  const [date, setDate] = useState(getTodayDate());
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Hadir");
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -34,12 +23,13 @@ export function AttendanceReport() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    console.log({date})
     try {
       const result = await getAllAttendance(
         token,
         currentPage,
         itemsPerPage,
-        startDate,
+        date,
         search,
         status
       );
@@ -49,14 +39,14 @@ export function AttendanceReport() {
       console.error(error);
     }
     setLoading(false);
-  }, [token, currentPage, startDate, search, status]);
+  }, [token, currentPage, date, search, status]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const handleReset = () => {
-    setStartDate(getTodayDate());
+    setDate(getTodayDate());
     setSearch("");
     setStatus("");
     setCurrentPage(1);
@@ -67,10 +57,10 @@ export function AttendanceReport() {
     <div className="space-y-5">
       {/* Filters */}
       <AttendanceFilterContainer
-        startDate={startDate}
+        date={date}
         search={search}
         status={status}
-        setStartDate={setStartDate}
+        setDate={setDate}
         setSearch={setSearch}
         setStatus={setStatus}
         setCurrentPage={setCurrentPage}
