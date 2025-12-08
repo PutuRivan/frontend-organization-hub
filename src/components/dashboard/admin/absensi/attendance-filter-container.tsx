@@ -15,8 +15,10 @@ import {
 interface AttendanceFilterContainerProps {
   startDate: string;
   search: string;
+  status: string;
   setStartDate: React.Dispatch<React.SetStateAction<string>>;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
+  setStatus: React.Dispatch<React.SetStateAction<string>>;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   handleReset: () => void;
 }
@@ -24,8 +26,10 @@ interface AttendanceFilterContainerProps {
 export default function AttendanceFilterContainer({
   startDate,
   search,
+  status,
   setStartDate,
   setSearch,
+  setStatus,
   setCurrentPage,
   handleReset,
 }: AttendanceFilterContainerProps) {
@@ -62,21 +66,26 @@ export default function AttendanceFilterContainer({
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Status</Label>
-          <Select>
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              setStatus(value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Pilih status" />
+              <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="present">Hadir</SelectItem>
-              <SelectItem value="absent">Tidak Hadir</SelectItem>
+              <SelectItem value="Hadir">Hadir</SelectItem>
+              <SelectItem value="Izin">Izin</SelectItem>
+              <SelectItem value="Sakit">Sakit</SelectItem>
+              <SelectItem value="Alfa">Alfa</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Buttons */}
-        <Button className="w-full" onClick={handleReset}>
-          Reset
-        </Button>
         <Button
           variant="outline"
           size="lg"
@@ -85,6 +94,9 @@ export default function AttendanceFilterContainer({
         >
           <Download className="h-4 w-4" />
           Ekspor Data
+        </Button>
+        <Button className="w-full" onClick={handleReset}>
+          Reset
         </Button>
       </div>
     </Card>

@@ -21,6 +21,7 @@ export function AttendanceReport() {
 
   const [startDate, setStartDate] = useState(getTodayDate());
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -39,7 +40,8 @@ export function AttendanceReport() {
         currentPage,
         itemsPerPage,
         startDate,
-        search
+        search,
+        status
       );
       setData(result.data);
       setTotalItems(result.pagination.totalData);
@@ -47,7 +49,7 @@ export function AttendanceReport() {
       console.error(error);
     }
     setLoading(false);
-  }, [token, currentPage, startDate, search]);
+  }, [token, currentPage, startDate, search, status]);
 
   useEffect(() => {
     fetchData();
@@ -56,6 +58,7 @@ export function AttendanceReport() {
   const handleReset = () => {
     setStartDate(getTodayDate());
     setSearch("");
+    setStatus("");
     setCurrentPage(1);
   };
 
@@ -66,8 +69,10 @@ export function AttendanceReport() {
       <AttendanceFilterContainer
         startDate={startDate}
         search={search}
+        status={status}
         setStartDate={setStartDate}
         setSearch={setSearch}
+        setStatus={setStatus}
         setCurrentPage={setCurrentPage}
         handleReset={handleReset}
       />
