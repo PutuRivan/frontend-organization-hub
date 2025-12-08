@@ -10,7 +10,16 @@ import AttendancePagination from "./attendance-pagination";
 import AttendanceTable from "./attendance-table";
 
 export function AttendanceReport() {
-  const [startDate, setStartDate] = useState("");
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const [startDate, setStartDate] = useState(getTodayDate());
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
@@ -45,13 +54,9 @@ export function AttendanceReport() {
   }, [fetchData]);
 
   const handleReset = () => {
-    setStartDate("");
+    setStartDate(getTodayDate());
     setSearch("");
     setCurrentPage(1);
-  };
-
-  const handleExport = () => {
-    alert("Export data functionality would be implemented here");
   };
 
 
@@ -66,14 +71,6 @@ export function AttendanceReport() {
         setCurrentPage={setCurrentPage}
         handleReset={handleReset}
       />
-
-      {/* Export */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="lg" onClick={handleExport} className="gap-2">
-          <Download className="h-4 w-4" />
-          Ekspor Data
-        </Button>
-      </div>
 
       {/* Table */}
       {loading ? (

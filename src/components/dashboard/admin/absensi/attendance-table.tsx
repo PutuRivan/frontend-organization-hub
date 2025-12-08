@@ -29,9 +29,9 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
       <TableBody>
         {data.map((item) => (
           <TableRow key={item.id}>
-            <TableCell className="font-medium">{item.user.name}</TableCell>
-            <TableCell className="font-medium">
-              {item.user.position}
+            <TableCell>{item.user.name}</TableCell>
+            <TableCell>
+              {item.user.jabatan}
             </TableCell>
             <TableCell>{formatDateTime(item.date)}</TableCell>
             <TableCell>
