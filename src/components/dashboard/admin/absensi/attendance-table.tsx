@@ -15,7 +15,6 @@ interface AttendanceTableProps {
 }
 
 export default function AttendanceTable({ data }: AttendanceTableProps) {
-  console.log(data)
   return (
     <Table>
       <TableHeader>
@@ -27,23 +26,31 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((item) => (
-          <TableRow key={item.id}>
-            <TableCell>{item.user.name}</TableCell>
-            <TableCell>
-              {item.user.jabatan}
-            </TableCell>
-            <TableCell>{formatDateTime(item.date)}</TableCell>
-            <TableCell>
-              <Badge
-                variant="secondary"
-                className={getAttendanceStatus(item.status).className}
-              >
-                {getAttendanceStatus(item.status).label}
-              </Badge>
+        {data.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+              Tidak ada data kehadiran
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          data.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>{item.user.name}</TableCell>
+              <TableCell>
+                {item.user.jabatan}
+              </TableCell>
+              <TableCell>{formatDateTime(item.date)}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="secondary"
+                  className={getAttendanceStatus(item.status).className}
+                >
+                  {getAttendanceStatus(item.status).label}
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
     </Table>
   );

@@ -1,45 +1,106 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import type React from "react";
-import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import type { TAttandance } from "@/libs/types";
 
 interface AttendancePaginationProps {
+  searchTerm: string;
+  filteredData: TAttandance[];
+  currentPage: number;
   itemsPerPage: number;
   totalItems: number;
-  currentPage: number;
   totalPages: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function AttendancePagination({
+  searchTerm,
+  filteredData,
+  currentPage,
   itemsPerPage,
   totalItems,
-  currentPage,
   totalPages,
   setCurrentPage,
 }: AttendancePaginationProps) {
   return (
-    <div className="flex items-center justify-between border-t bg-muted/50 px-6 py-4">
-      <p className="text-sm text-muted-foreground">
-        Menampilkan 1-{itemsPerPage} dari {totalItems} hasil
+    <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <p className="text-sm text-muted-foreground w-full">
+        {searchTerm.trim()
+          ? `${filteredData.length} hasil ditemukan`
+          : `Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems} items`}
       </p>
-      <div className="flex gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+
+      {/* Pagination */}
+      <Pagination className="justify-end">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentPage(Math.max(1, currentPage - 1));
+              }}
+              className={
+                currentPage === 1 || totalItems === 0 || filteredData.length === 0
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
+            />
+          </PaginationItem>
+
+          {(() => {
+            const visiblePages = 5; // jumlah halaman yang ingin ditampilkan
+            let startPage = Math.max(
+              1,
+              currentPage - Math.floor(visiblePages / 2),
+            );
+            let endPage = startPage + visiblePages - 1;
+
+            if (endPage > totalPages) {
+              endPage = totalPages;
+              startPage = Math.max(1, endPage - visiblePages + 1);
+            }
+
+            return Array.from(
+              { length: endPage - startPage + 1 },
+              (_, i) => startPage + i,
+            ).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ));
+          })()}
+
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentPage(Math.min(totalPages, currentPage + 1));
+              }}
+              className={
+                currentPage === totalPages || totalItems === 0 || filteredData.length === 0
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 }
