@@ -67,7 +67,7 @@ export default function Page() {
       <div className="mb-6 flex justify-between">
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
         <Link href={"inventaris-barang/create"}>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button>
             <Plus className="h-4 w-4" />
             Tambah Barang
           </Button>
