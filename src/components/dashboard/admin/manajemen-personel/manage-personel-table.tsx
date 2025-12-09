@@ -1,5 +1,4 @@
 import { Edit2, Eye, Trash2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

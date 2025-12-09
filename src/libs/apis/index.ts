@@ -1,3 +1,4 @@
+import type { TEventSchema } from "../schema";
 import type { TTokenCheckResponse } from "../types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -20,7 +21,7 @@ export async function countTable(token: string) {
       Authorization: `Bearer ${parsedToken}`,
     },
   });
-  console.log(res)
+  console.log(res);
   if (!res.ok) {
     throw new Error("Gagal mengambil data count table");
   }
@@ -62,29 +63,33 @@ export async function getInventoryById(token: string, id: string) {
 }
 
 export async function createNewInventory(token: string, formData: FormData) {
-  const parsedToken = JSON.parse(token)
-  console.log(parsedToken)
+  const parsedToken = JSON.parse(token);
+  console.log(parsedToken);
   const res = await fetch(`${API_URL}/inventory`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${parsedToken}`,
     },
     body: formData,
-  })
-  return await res.json()
+  });
+  return await res.json();
 }
 
-export async function updateInventory(token: string, id: string, formData: FormData) {
-  const parsedToken = JSON.parse(token)
+export async function updateInventory(
+  token: string,
+  id: string,
+  formData: FormData,
+) {
+  const parsedToken = JSON.parse(token);
   const res = await fetch(`${API_URL}/inventory/${id}`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${parsedToken}`,
     },
-    body: formData
-  })
+    body: formData,
+  });
 
-  return await res.json()
+  return await res.json();
 }
 
 export async function deleteInventory(token: string, id: string) {
@@ -111,9 +116,9 @@ export async function getAllAttendance(
   limit = 5,
   date?: string,
   name?: string,
-  status?: string
+  status?: string,
 ) {
-  const parsedToken = JSON.parse(token)
+  const parsedToken = JSON.parse(token);
   const params = new URLSearchParams();
   params.append("page", page.toString());
   params.append("limit", limit.toString());
@@ -122,15 +127,18 @@ export async function getAllAttendance(
   if (name) params.append("name", name);
   if (status) params.append("status", status);
 
-  console.log(params.toString())
+  console.log(params.toString());
   try {
-    const res = await fetch(`${API_URL}/attendance/personel?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${parsedToken}`, // Token
+    const res = await fetch(
+      `${API_URL}/attendance/personel?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${parsedToken}`, // Token
+        },
       },
-    });
+    );
 
     if (!res.ok) {
       const errorData = await res.json();
@@ -144,7 +152,6 @@ export async function getAllAttendance(
     throw error;
   }
 }
-
 
 export async function getTodayAttendance(token: string) {
   const parsedToken = JSON.parse(token);
@@ -177,7 +184,7 @@ export async function createAttendance(
     userId?: string;
     status?: "Hadir" | "Izin" | "Sakit" | "Alfa";
     note?: string;
-  }
+  },
 ) {
   const parsedToken = JSON.parse(token);
 
@@ -202,44 +209,41 @@ export async function createAttendance(
 export async function getAllPersonel(
   token: string,
   page: number = 1,
-  userPerPage: number = 10
+  userPerPage: number = 10,
 ) {
-  const parsedToken = JSON.parse(token)
+  const parsedToken = JSON.parse(token);
 
-  const res = await fetch(`${API_URL}/users/personel?page=${page}&limit=${userPerPage}`, {
-    cache: 'no-store',
-    headers: {
-      Authorization: `Bearer ${parsedToken}`
-    }
-  })
+  const res = await fetch(
+    `${API_URL}/users/personel?page=${page}&limit=${userPerPage}`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${parsedToken}`,
+      },
+    },
+  );
 
-  if (!res.ok) throw new Error("Gagal Mengambil Data User")
+  if (!res.ok) throw new Error("Gagal Mengambil Data User");
 
-  return await res.json()
+  return await res.json();
 }
 
-export async function getPersonelById(
-  token: string,
-  id: string
-) {
-  const parsedToken = JSON.parse(token)
+export async function getPersonelById(token: string, id: string) {
+  const parsedToken = JSON.parse(token);
 
   const res = await fetch(`${API_URL}/user/personel/${id}`, {
     headers: {
-      Authorization: `Bearer ${parsedToken}`
-    }
-  })
+      Authorization: `Bearer ${parsedToken}`,
+    },
+  });
 
-  if (!res.ok) throw new Error("Gagal Mengambil Data User")
+  if (!res.ok) throw new Error("Gagal Mengambil Data User");
 
-  return await res.json()
+  return await res.json();
 }
 
-export async function createPersonel(
-  token: string,
-  formData: FormData
-) {
-  const parsedToken = JSON.parse(token)
+export async function createPersonel(token: string, formData: FormData) {
+  const parsedToken = JSON.parse(token);
 
   const res = await fetch(`${API_URL}/user`, {
     method: "POST",
@@ -247,17 +251,17 @@ export async function createPersonel(
       Authorization: `Bearer ${parsedToken}`,
     },
     body: formData,
-  })
+  });
 
-  const responseData = await res.json()
+  const responseData = await res.json();
 
-  if (!res.ok) throw new Error("Gagal Membuat Data User")
+  if (!res.ok) throw new Error("Gagal Membuat Data User");
 
-  return responseData
+  return responseData;
 }
 
 export async function deletePersonel(token: string, id: string) {
-  const parsedToken = JSON.parse(token)
+  const parsedToken = JSON.parse(token);
 
   const res = await fetch(`${API_URL}/user/${id}`, {
     method: "DELETE",
@@ -267,16 +271,16 @@ export async function deletePersonel(token: string, id: string) {
     },
   });
 
-  if (!res.ok) throw new Error("Gagal Menghapus Data User")
+  if (!res.ok) throw new Error("Gagal Menghapus Data User");
 
-  return res
+  return res;
 }
 
 export async function getAllEvents(
   token: string,
   page: number = 1,
   limit: number = 10,
-  search?: string
+  search?: string,
 ) {
   const parsedToken = JSON.parse(token);
   const params = new URLSearchParams();
@@ -306,4 +310,23 @@ export async function getAllEvents(
     console.error("Error getAllEvents:", error);
     throw error;
   }
+}
+
+export async function createEvent(token: string, data: TEventSchema) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/events`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const responseData = await res.json();
+
+  if (!res.ok) throw new Error("Gagal Membuat Data Event");
+
+  return responseData;
 }

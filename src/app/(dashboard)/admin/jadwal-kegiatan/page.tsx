@@ -127,7 +127,9 @@ export default function Home() {
 
       <EventAddDialog
         open={showAddEvent}
+        token={token}
         onOpenChange={setShowAddEvent}
+        onSuccess={fetchEvents}
       />
     </main>
   );
