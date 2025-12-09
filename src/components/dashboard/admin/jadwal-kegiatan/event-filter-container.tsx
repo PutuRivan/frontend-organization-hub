@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface EventFilterContainerProps {
   searchQuery: string;
@@ -24,5 +24,5 @@ export default function EventFilterContainer({
         </div>
       </div>
     </div>
-  )
+  );
 }
