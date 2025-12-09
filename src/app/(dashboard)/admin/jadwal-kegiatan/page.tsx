@@ -16,13 +16,6 @@ import { getAllEvents } from "@/libs/apis";
 import type { TEvent } from "@/libs/types";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 
-interface EventForCalendar {
-  id: string;
-  title: string;
-  date: Date;
-  category: "meeting" | "presentation" | "deadline";
-}
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddEvent, setShowAddEvent] = useState(false);
@@ -63,12 +56,11 @@ export default function Home() {
   }, [fetchEvents]);
 
   // Convert API events to calendar format
-  const calendarEvents: EventForCalendar[] = useMemo(() => {
+  const calendarEvents: TEvent[] = useMemo(() => {
     return events.map((event) => ({
-      id: event.id,
-      title: event.name,
-      date: new Date(event.start_datetime),
-      category: "meeting" as const, // Default category, can be enhanced later
+      ...event,
+      start_datetime: new Date(event.start_datetime),
+      end_datetime: new Date(event.end_datetime),
     }));
   }, [events]);
 

@@ -47,11 +47,12 @@ export type TEvent = {
   id: string;
   name: string;
   place: string;
-  leader: string;
-  category: string;
-  dress_code: string;
-  start_datetime: string;
-  end_datetime: string;
+  leader: string | null;
+  category: string | null;
+  dress_code: string | null;
+  created_by: string;
+  start_datetime: string | Date;
+  end_datetime: string | Date;
 };
 
 export type TTokenCheckResponse = {
