@@ -1,10 +1,13 @@
 "use client";
 
+import { format } from "date-fns";
+import { CalendarIcon, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +16,14 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { createEvent } from "@/libs/apis";
 import type { TEventSchema } from "@/libs/schema";
+import { cn } from "@/libs/utils";
 
 interface EventAddDialogProps {
   open: boolean;
@@ -35,6 +44,7 @@ export default function EventAddDialog({
     handleSubmit,
     register,
     reset,
+    control,
     formState: { errors },
   } = useForm<TEventSchema>({
     defaultValues: {
@@ -57,6 +67,7 @@ export default function EventAddDialog({
         throw new Error("Gagal menambahkan kegiatan");
       }
       toast.success("Kegiatan berhasil ditambahkan");
+      onOpenChange(false);
       if (onSuccess) {
         onSuccess();
       }
@@ -64,7 +75,6 @@ export default function EventAddDialog({
       toast.error("Gagal menambahkan kegiatan");
     } finally {
       setLoading(false);
-      onOpenChange(false);
       router.refresh();
       reset();
     }
@@ -144,30 +154,167 @@ export default function EventAddDialog({
             </div>
 
             <div className="flex gap-2">
-              <Field>
-                <FieldLabel htmlFor="start_date">Tanggal Mulai</FieldLabel>
-                <Input
-                  id="start_date"
-                  type="date"
-                  required
-                  {...register("start_date")}
-                />
-                {errors.start_date && (
-                  <p className="text-red-500">{errors.start_date.message}</p>
+              <Controller
+                control={control}
+                name="start_date"
+                render={({ field }) => (
+                  <Field className="flex flex-col gap-2 w-full">
+                    <FieldLabel htmlFor="start_date">Tanggal Mulai</FieldLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value ? (
+                            format(new Date(field.value), "PPP p")
+                          ) : (
+                            <span>Pilih tanggal & waktu</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) => {
+                            if (!date) {
+                              field.onChange("");
+                              return;
+                            }
+                            const current = field.value ? new Date(field.value) : new Date();
+                            const newDate = new Date(
+                              date.getFullYear(),
+                              date.getMonth(),
+                              date.getDate(),
+                              current.getHours(),
+                              current.getMinutes()
+                            );
+                            field.onChange(format(newDate, "yyyy-MM-dd HH:mm"));
+                          }}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                        />
+                        <div className="p-3 border-t border-border">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 opacity-50" />
+                            <Input
+                              type="time"
+                              className="w-full"
+                              value={field.value ? format(new Date(field.value), "HH:mm") : "00:00"}
+                              onChange={(e) => {
+                                const time = e.target.value;
+                                if (!time) return;
+                                const [hours, minutes] = time.split(":").map(Number);
+                                const current = field.value ? new Date(field.value) : new Date();
+                                const newDate = new Date(
+                                  current.getFullYear(),
+                                  current.getMonth(),
+                                  current.getDate(),
+                                  hours,
+                                  minutes
+                                );
+                                field.onChange(format(newDate, "yyyy-MM-dd HH:mm"));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    {errors.start_date && (
+                      <p className="text-red-500">
+                        {errors.start_date.message}
+                      </p>
+                    )}
+                  </Field>
                 )}
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="end_date">Tanggal Selesai</FieldLabel>
-                <Input
-                  id="end_date"
-                  type="date"
-                  required
-                  {...register("end_date")}
-                />
-                {errors.end_date && (
-                  <p className="text-red-500">{errors.end_date.message}</p>
+              />
+
+              <Controller
+                control={control}
+                name="end_date"
+                render={({ field }) => (
+                  <Field className="flex flex-col gap-2 w-full">
+                    <FieldLabel htmlFor="end_date">Tanggal Selesai</FieldLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value ? (
+                            format(new Date(field.value), "PPP p")
+                          ) : (
+                            <span>Pilih tanggal & waktu</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) => {
+                            if (!date) {
+                              field.onChange("");
+                              return;
+                            }
+                            const current = field.value ? new Date(field.value) : new Date();
+                            const newDate = new Date(
+                              date.getFullYear(),
+                              date.getMonth(),
+                              date.getDate(),
+                              current.getHours(),
+                              current.getMinutes()
+                            );
+                            field.onChange(format(newDate, "yyyy-MM-dd HH:mm"));
+                          }}
+                          disabled={(date) => date < new Date("1900-01-01")}
+                          initialFocus
+                        />
+                        <div className="p-3 border-t border-border">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 opacity-50" />
+                            <Input
+                              type="time"
+                              className="w-full"
+                              value={field.value ? format(new Date(field.value), "HH:mm") : "00:00"}
+                              onChange={(e) => {
+                                const time = e.target.value;
+                                if (!time) return;
+                                const [hours, minutes] = time.split(":").map(Number);
+                                const current = field.value ? new Date(field.value) : new Date();
+                                const newDate = new Date(
+                                  current.getFullYear(),
+                                  current.getMonth(),
+                                  current.getDate(),
+                                  hours,
+                                  minutes
+                                );
+                                field.onChange(format(newDate, "yyyy-MM-dd HH:mm"));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    {errors.end_date && (
+                      <p className="text-red-500">{errors.end_date.message}</p>
+                    )}
+                  </Field>
                 )}
-              </Field>
+              />
             </div>
           </FieldGroup>
           <div className="flex justify-end gap-2">
@@ -178,7 +325,9 @@ export default function EventAddDialog({
             >
               Batal
             </Button>
-            <Button type="submit" disabled={loading}>Tambah</Button>
+            <Button type="submit" disabled={loading}>
+              Tambah
+            </Button>
           </div>
         </form>
       </DialogContent>
