@@ -331,6 +331,25 @@ export async function createEvent(token: string, data: TEventSchema) {
   return responseData;
 }
 
+export async function updateEvents(token: string, data:TEventSchema, id:string) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/events/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const responseData = await res.json();
+
+  if (!res.ok) throw new Error("Gagal Mengupdate Data Event");
+
+  return responseData;
+}
+
 export async function deleteEvent(token: string, id: string) {
   const parsedToken = JSON.parse(token);
 

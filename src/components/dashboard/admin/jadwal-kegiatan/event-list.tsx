@@ -1,5 +1,7 @@
 import { Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import EventUpdateDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-update-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteEventAction } from "@/libs/action";
@@ -18,6 +20,9 @@ export default function EventList({
   pathname,
   fetchEvents,
 }: EventListProps) {
+  const [selectedEvent, setSelectedEvent] = useState<TEvent | null>(null);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
   const getCategoryBadge = (category: string | null) => {
     switch (category) {
       case "meeting":
@@ -60,7 +65,8 @@ export default function EventList({
   };
 
   const handleUpdate = (event: TEvent) => {
-    console.log(event);
+    setSelectedEvent(event);
+    setShowUpdateDialog(true);
   };
 
   return (
@@ -136,6 +142,14 @@ export default function EventList({
           );
         })
       )}
+
+      <EventUpdateDialog
+        open={showUpdateDialog}
+        onOpenChange={setShowUpdateDialog}
+        token={token}
+        onSuccess={fetchEvents}
+        event={selectedEvent}
+      />
     </div>
   );
 }
