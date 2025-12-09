@@ -330,3 +330,19 @@ export async function createEvent(token: string, data: TEventSchema) {
 
   return responseData;
 }
+
+export async function deleteEvent(token: string, id: string) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/events/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${parsedToken}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Gagal Menghapus Data Event");
+
+  return res;
+}

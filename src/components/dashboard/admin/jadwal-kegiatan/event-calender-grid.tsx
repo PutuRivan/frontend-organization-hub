@@ -149,6 +149,7 @@ export default function EventCalendarGrid({
                       className={`text-xs px-2 py-1 rounded truncate ${getCategoryColor(event.category)}`}
                     >
                       {event.name}
+                      <p className="text-xs text-muted-foreground">{event.start_datetime.toString().split(" ")[4]}</p>
                     </div>
                   ))}
                   {dayEvents.length > 2 && (

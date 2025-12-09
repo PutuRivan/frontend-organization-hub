@@ -1,13 +1,23 @@
 import { Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deleteEventAction } from "@/libs/action";
 import type { TEvent } from "@/libs/types";
 
 interface EventListProps {
   events: TEvent[];
+  token: string;
+  pathname: string;
+  fetchEvents: () => void;
 }
 
-export default function EventList({ events }: EventListProps) {
+export default function EventList({
+  events,
+  token,
+  pathname,
+  fetchEvents,
+}: EventListProps) {
   const getCategoryBadge = (category: string | null) => {
     switch (category) {
       case "meeting":
@@ -34,11 +44,19 @@ export default function EventList({ events }: EventListProps) {
   };
 
   const sortedEvents = [...events].sort(
-    (a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime(),
+    (a, b) =>
+      new Date(a.start_datetime).getTime() -
+      new Date(b.start_datetime).getTime(),
   );
 
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = async (id: string) => {
+    const response = await deleteEventAction(pathname, token, id);
+    if (!response.success) {
+      toast.error(response.message);
+    } else {
+      toast.success(response.message);
+      fetchEvents();
+    }
   };
 
   const handleUpdate = (event: TEvent) => {
@@ -54,13 +72,28 @@ export default function EventList({ events }: EventListProps) {
       ) : (
         sortedEvents.map((event) => {
           const badge = getCategoryBadge(event.category);
-          console.log(event.category)
-          const dateStr = new Date(event.start_datetime).toLocaleDateString("id-ID", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
+          const dateStr = new Date(event.start_datetime).toLocaleDateString(
+            "id-ID",
+            {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            },
+          );
+          const dateEndStr = new Date(event.end_datetime).toLocaleDateString(
+            "id-ID",
+            {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            },
+          );
 
           return (
             <div
@@ -69,7 +102,7 @@ export default function EventList({ events }: EventListProps) {
             >
               <div className="flex-1">
                 <h3 className="font-semibold">{event.name}</h3>
-                <p className="text-sm text-muted-foreground">{dateStr}</p>
+                <p className="text-sm text-muted-foreground">{dateStr} - {dateEndStr}</p>
               </div>
               <div className="flex items-center gap-3">
                 <Badge

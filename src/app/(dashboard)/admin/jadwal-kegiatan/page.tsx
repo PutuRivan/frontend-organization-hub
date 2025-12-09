@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import EventAddDialog from "@/components/dashboard/admin/jadwal-kegiatan/event-add-dialog";
 import EventCalendarHeader from "@/components/dashboard/admin/jadwal-kegiatan/event-calendar-header";
@@ -23,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const pathname = usePathname();
   const {
     currentDate,
     handleNextMonth,
@@ -110,7 +112,12 @@ export default function Home() {
               </TabsContent>
 
               <TabsContent value="list">
-                <EventList events={calendarEvents} />
+                <EventList
+                  pathname={pathname}
+                  token={token}
+                  events={calendarEvents}
+                  fetchEvents={fetchEvents}
+                />
               </TabsContent>
             </>
           )}
