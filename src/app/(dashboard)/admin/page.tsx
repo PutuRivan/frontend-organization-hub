@@ -18,7 +18,7 @@ export default async function page() {
   };
 
   return (
-    <main className="min-h-screen px-5">
+    <main className="px-5">
       <div className="mx-auto max-w-7xl">
         <DashboardStats countData={countData} />
         <div className="grid gap-6 lg:grid-cols-2 mt-6">

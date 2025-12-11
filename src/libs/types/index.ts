@@ -13,7 +13,8 @@ export type TUser = {
   update_at: string;
 };
 
-export type TAttendanceStatus = "Hadir" | "Izin" | "Alfa" | "Sakit";
+export type TAttendanceStatus = "Hadir" | "Kurang";
+export type TAttendanceAbsentReason = "Dinas" | "DIK" | "Izin" | "Cuti" | "Sakit" | "Hamil" | "BKO" | "TK" | "Terlambat";
 
 export type TAttandance = {
   id: string;
@@ -21,6 +22,7 @@ export type TAttandance = {
   time_in: string | null;
   time_out: string | null;
   status: TAttendanceStatus;
+  absent_reason: TAttendanceAbsentReason;
   note: string | null;
   created_at: string;
   updated_at: string;
