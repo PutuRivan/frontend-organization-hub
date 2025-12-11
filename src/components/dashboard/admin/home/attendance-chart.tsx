@@ -81,9 +81,9 @@ export default function AttendanceChart({
   const period = attendanceData?.period?.month ?? "N/A";
   const total = attendanceData?.total ?? 0;
   const hadir = attendanceData?.hadir ?? 0;
+  const kurangData = attendanceData?.Kurang;
 
   // Calculate total absences
-  const kurangData = attendanceData?.Kurang;
   const totalKurang = kurangData
     ? kurangData.dinas +
     kurangData.dik +
@@ -96,10 +96,9 @@ export default function AttendanceChart({
     kurangData.terlambat
     : 0;
 
-  const isEmpty = total === 0;
   const GRAY_COLOR = "#9ca3af";
 
-  // Data for Overview Chart (Hadir vs Kurang)
+  // Data for Overview Legend (Always show all categories)
   const overviewData = [
     {
       name: "Hadir",
@@ -116,74 +115,61 @@ export default function AttendanceChart({
       color: COLORS.kurang,
       key: "kurang",
     },
-  ].filter((item) => item.value > 0);
+  ];
 
-  const displayOverviewData =
-    overviewData.length === 0 && !isEmpty
+  // Data for Breakdown Legend (Always show all categories)
+  const breakdownData: any[] = [];
+  const categories = [
+    "dinas",
+    "dik",
+    "izin",
+    "cuti",
+    "sakit",
+    "hamil",
+    "bko",
+    "tk",
+    "terlambat",
+  ] as const;
+
+  categories.forEach((key) => {
+    const value = kurangData ? kurangData[key] : 0;
+    const percentage = kurangData
+      ? (kurangData[`${key}Percentage` as keyof AbsenceData] ?? 0)
+      : 0;
+
+    breakdownData.push({
+      name: LABELS[key],
+      value: value,
+      percentage: percentage,
+      color: COLORS[key],
+      key: key,
+    });
+  });
+
+  // Data for Charts (Handle empty state for visual presentation)
+  const chartOverviewData =
+    total === 0
       ? [
         {
           name: "Tidak ada data",
           value: 1,
-          percentage: 0,
           color: GRAY_COLOR,
           key: "empty",
         },
       ]
-      : isEmpty
-        ? [
-          {
-            name: "Tidak ada data",
-            value: 1,
-            percentage: 0,
-            color: GRAY_COLOR,
-            key: "empty",
-          },
-        ]
-        : overviewData;
+      : overviewData.filter((d) => d.value > 0);
 
-  // Data for Breakdown Chart (Specific Absences)
-  const breakdownData: any[] = [];
-  if (kurangData) {
-    const categories = [
-      "dinas",
-      "dik",
-      "izin",
-      "cuti",
-      "sakit",
-      "hamil",
-      "bko",
-      "tk",
-      "terlambat",
-    ] as const;
-
-    categories.forEach((key) => {
-      const value = kurangData[key];
-      const percentage = kurangData[`${key}Percentage` as keyof AbsenceData];
-
-      if (value > 0) {
-        breakdownData.push({
-          name: LABELS[key],
-          value: value,
-          percentage: percentage,
-          color: COLORS[key],
-          key: key,
-        });
-      }
-    });
-  }
-
-  const displayBreakdownData =
-    breakdownData.length === 0
+  const chartBreakdownData =
+    totalKurang === 0
       ? [
         {
           name: "Tidak ada absen",
           value: 1,
-          percentage: 0,
           color: GRAY_COLOR,
           key: "empty",
         },
       ]
-      : breakdownData;
+      : breakdownData.filter((d) => d.value > 0);
 
   const renderChart = (data: any[], centerLabel: string, subLabel: string) => (
     <div className="flex justify-center relative">
@@ -255,37 +241,31 @@ export default function AttendanceChart({
   );
 
   const renderLegend = (data: any[]) => (
-    <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-      {data.some((d: any) => d.key === "empty") ? (
-        <div className="text-center text-gray-500 py-4">
-          Tidak ada data untuk ditampilkan
-        </div>
-      ) : (
-        data.map((item: any) => (
-          <div
-            key={item.key}
-            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-gray-100"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="h-4 w-4 rounded-full"
-                style={{ backgroundColor: item.color }}
-              ></div>
-              <span className="text-sm font-medium text-gray-700">
-                {item.name}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-gray-900">
-                {item.value}
-              </span>
-              <span className="text-xs text-gray-500 font-medium">
-                ({item.percentage}%)
-              </span>
-            </div>
+    <div className="flex flex-col gap-3 pr-2">
+      {data.map((item: any) => (
+        <div
+          key={item.key}
+          className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-gray-100"
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="h-4 w-4 rounded-full"
+              style={{ backgroundColor: item.color }}
+            ></div>
+            <span className="text-sm font-medium text-gray-700">
+              {item.name}
+            </span>
           </div>
-        ))
-      )}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-900">
+              {item.value}
+            </span>
+            <span className="text-xs text-gray-500 font-medium">
+              ({item.percentage}%)
+            </span>
+          </div>
+        </div>
+      ))}
 
       <div className="pt-3 mt-auto border-t-2 border-gray-200">
         <div className="flex items-center justify-between">
@@ -293,7 +273,7 @@ export default function AttendanceChart({
             Total Personel
           </span>
           <span
-            className={`text-lg font-bold ${isEmpty ? "text-gray-600" : "text-blue-600"}`}
+            className={`text-lg font-bold ${total === 0 ? "text-gray-600" : "text-blue-600"}`}
           >
             {total}
           </span>
@@ -317,11 +297,11 @@ export default function AttendanceChart({
         <div className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
             {renderChart(
-              displayOverviewData,
+              chartOverviewData,
               `${attendanceData?.hadirPercentage ?? 0}%`,
               "Kehadiran",
             )}
-            {renderLegend(displayOverviewData)}
+            {renderLegend(overviewData)}
           </div>
         </div>
         <div className="mb-4 flex items-center justify-center">
@@ -333,11 +313,11 @@ export default function AttendanceChart({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
           {renderChart(
-            displayBreakdownData,
+            chartBreakdownData,
             `${total > 0 ? ((totalKurang / total) * 100).toFixed(1) : 0}%`,
             "Ketidakhadiran",
           )}
-          {renderLegend(displayBreakdownData)}
+          {renderLegend(breakdownData)}
         </div>
       </Card>
     </div>
