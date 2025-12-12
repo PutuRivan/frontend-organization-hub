@@ -2,6 +2,7 @@ export type TStatus = "Aktif" | "Tidak_Aktif";
 
 export type TUser = {
   id: string;
+  nrp: string;
   name: string;
   email: string;
   image: string | null;
@@ -11,6 +12,7 @@ export type TUser = {
   status?: TStatus;
   created_at: string;
   update_at: string;
+  attendance: TAttandance;
 };
 
 export type TAttendanceStatus = "Hadir" | "Kurang";

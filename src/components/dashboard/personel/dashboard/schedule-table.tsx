@@ -1,39 +1,21 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { TEvent } from "@/libs/types";
+import { formatDateTime } from "@/libs/utils";
 
-export function ScheduleTable() {
-  const schedules = [
-    {
-      date: "Senin, 20 Mei 2024",
-      activity: "Rapat Koordinasi Tim",
-      time: "10:00 - 11:30 WIB",
-      location: "Ruang Rapat A",
-    },
-    {
-      date: "Selasa, 21 Mei 2024",
-      activity: "Sesi Pelatihan Produk Baru",
-      time: "14:00 - 16:00 WIB",
-      location: "Auditorium",
-    },
-    {
-      date: "Rabu, 22 Mei 2024",
-      activity: "Presentasi Klien",
-      time: "09:00 - 10:00 WIB",
-      location: "Online (Zoom)",
-    },
-    {
-      date: "Jumat, 24 Mei 2024",
-      activity: "Diskusi Proyek Mingguan",
-      time: "15:00 - 16:00 WIB",
-      location: "Ruang Diskusi C",
-    },
-    {
-      date: "Jumat, 24 Mei 2024",
-      activity: "Diskusi Proyek Mingguan",
-      time: "15:00 - 16:00 WIB",
-      location: "Ruang Diskusi C",
-    },
-  ];
+interface ScheduleTableProps {
+  events: TEvent[];
+}
+
+export function ScheduleTable({ events }: ScheduleTableProps) {
+  const schedules = events;
 
   return (
     <Card className="border border-border">
@@ -41,37 +23,19 @@ export function ScheduleTable() {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-border">
-              <TableHead>
-                HARI/TANGGAL
-              </TableHead>
-              <TableHead>
-                NAMA KEGIATAN
-              </TableHead>
-              <TableHead>
-                WAKTU
-              </TableHead>
-              <TableHead>
-                LOKASI
-              </TableHead>
+              <TableHead>HARI/TANGGAL</TableHead>
+              <TableHead>NAMA KEGIATAN</TableHead>
+              <TableHead>WAKTU</TableHead>
+              <TableHead>LOKASI</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {schedules.map((schedule, idx) => (
-              <TableRow
-                key={idx}
-              >
-                <TableCell>
-                  {schedule.date}
-                </TableCell>
-                <TableCell>
-                  {schedule.activity}
-                </TableCell>
-                <TableCell>
-                  {schedule.time}
-                </TableCell>
-                <TableCell>
-                  {schedule.location}
-                </TableCell>
+              <TableRow key={idx}>
+                <TableCell>{formatDateTime(schedule.start_datetime.toString())}</TableCell>
+                <TableCell>{schedule.name}</TableCell>
+                <TableCell>{formatDateTime(schedule.end_datetime.toString())}</TableCell>
+                <TableCell>{schedule.place}</TableCell>
               </TableRow>
             ))}
           </TableBody>

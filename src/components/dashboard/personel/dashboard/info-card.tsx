@@ -1,35 +1,40 @@
-import { Calendar, CheckCircle2, ClipboardList } from "lucide-react";
+import { Calendar, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TEvent, TUser } from "@/libs/types";
 
-export function InfoCards() {
+interface InfoCardsProps {
+  user: TUser | null;
+  events: TEvent | null;
+}
+
+export function InfoCards({ user, events }: InfoCardsProps) {
   const cards = [
     {
       title: "Profil Pengguna",
       icon: "👤",
-      details: [{ label: "Nama Pengguna ID:", value: "123456789" }],
+      details: [{
+        label: "Nama Pengguna ID:",
+        value: user?.nrp ?? ""
+      }],
     },
     {
       title: "Status Kehadiran",
       icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
       details: [
-        { label: "Sudah Absen Masuk", value: "" },
-        { label: "Pukul 08:00 WIB", value: "" },
+        { label: user?.attendance ? "Absen Masuk" : "Tidak Hadir", value: user?.attendance?.time_in ?? "" },
+        { label: user?.attendance ? "Absen Pulang" : "", value: user?.attendance?.time_out ?? "" },
+        { label: user?.attendance?.absent_reason ? "Alasan" : "", value: user?.attendance?.absent_reason ?? "" },
       ],
-    },
-    {
-      title: "Inventaris Dipinjam",
-      icon: <ClipboardList className="w-12 h-12 text-yellow-500" />,
-      details: [{ label: "3 Barang", value: "" }],
     },
     {
       title: "Jadwal Terdekat",
       icon: <Calendar className="w-12 h-12 text-blue-500" />,
-      details: [{ label: "Rapat Koordinasi 10:00 WIB", value: "" }],
+      details: [{ label: events?.name ?? "", value: events?.start_datetime ?? "" }],
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-5">
       {cards.map((card, idx) => (
         <Card key={idx} className="border border-border">
           <CardHeader className="pb-3">
