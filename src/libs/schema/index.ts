@@ -24,10 +24,19 @@ export const createInventory = z.object({
 export type TCreateInventory = z.infer<typeof createInventory>;
 
 export const attendanceSchema = z.object({
-  attendanceType: z.enum(["present", "permission", "sick", "alfa"], {
-    required_error: "Pilih jenis absensi",
+  status: z.enum(["Hadir", "Kurang"], {
+    required_error: "Pilih status absensi",
   }),
+  absentReason: z.enum(["Dinas", "DIK", "Izin", "Cuti", "Sakit", "Hamil", "BKO", "TK", "Terlambat"]).optional(),
   remarks: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.status === "Kurang" && !data.absentReason) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Alasan harus dipilih jika Kurang",
+      path: ["absentReason"],
+    });
+  }
 });
 
 export type TAttendanceSchema = z.infer<typeof attendanceSchema>;
@@ -39,7 +48,7 @@ export const personelSchema = z.object({
   image: z.any().optional(),
   jabatan: z.string().min(1, { message: 'Jabatan harus dipilih' }),
   password: z.string().min(1, { message: 'Password harus diisi' }),
-  status: z.boolean(),
+  status: z.enum(["Aktif", "Tidak_Aktif"]),
   role: z.string().optional(),
   pangkat: z.string(),
 })

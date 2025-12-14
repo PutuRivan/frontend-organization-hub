@@ -25,10 +25,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/auth-context";
 import { createAttendance, getTodayAttendance } from "@/libs/apis";
 import { attendanceSchema, type TAttendanceSchema } from "@/libs/schema";
+import type { TAttendanceAbsentReason } from "@/libs/types";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 
 const formatAttendanceTime = (date: Date): string => {
@@ -64,12 +72,12 @@ export default function AttendanceForm() {
   const form = useForm<TAttendanceSchema>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      attendanceType: "alfa",
+      status: "Hadir",
       remarks: "",
     },
   });
 
-  const attendanceType = form.watch("attendanceType");
+  const status = form.watch("status");
 
   // Check attendance status on mount
   useEffect(() => {
@@ -98,19 +106,6 @@ export default function AttendanceForm() {
     checkTodayAttendance();
   }, []);
 
-  // Map form values to backend status values
-  const mapStatusToBackend = (
-    status: string,
-  ): "Hadir" | "Izin" | "Sakit" | "Alfa" | undefined => {
-    const statusMap: Record<string, "Hadir" | "Izin" | "Sakit" | "Alfa"> = {
-      present: "Hadir",
-      permission: "Izin",
-      sick: "Sakit",
-      alfa: "Alfa",
-    };
-    return statusMap[status];
-  };
-
   const onSubmit = async (values: TAttendanceSchema) => {
     try {
       const token = getAccessTokenFromCookie();
@@ -125,13 +120,15 @@ export default function AttendanceForm() {
 
       // Prepare request data
       const requestData: {
-        status?: "Hadir" | "Izin" | "Sakit" | "Alfa";
+        status?: string;
+        absentReason?: TAttendanceAbsentReason;
         note?: string;
-      } = {};
+      } = {
+        status: values.status,
+      };
 
-      const mappedStatus = mapStatusToBackend(values.attendanceType);
-      if (mappedStatus) {
-        requestData.status = mappedStatus;
+      if (values.status === "Kurang" && values.absentReason) {
+        requestData.absentReason = values.absentReason;
       }
 
       if (values.remarks?.trim()) {
@@ -153,8 +150,9 @@ export default function AttendanceForm() {
       }
 
       // Reset form remarks if present
-      if (values.attendanceType === "present") {
+      if (values.status === "Hadir") {
         form.setValue("remarks", "");
+        form.setValue("absentReason", undefined);
       }
     } catch (error) {
       const errorMessage =
@@ -178,38 +176,17 @@ export default function AttendanceForm() {
   };
 
   const getRadioClass = (value: string) => {
-    const colorMap: Record<
-      string,
-      { active: string; inactive: string; hover: string }
-    > = {
-      present: {
-        active: "border-green-600 bg-green-50",
-        inactive: "border-gray-200",
-        hover: "hover:border-green-300",
-      },
-      permission: {
-        active: "border-yellow-600 bg-yellow-50",
-        inactive: "border-gray-200",
-        hover: "hover:border-yellow-300",
-      },
-      sick: {
-        active: "border-blue-600 bg-blue-50",
-        inactive: "border-gray-200",
-        hover: "hover:border-blue-300",
-      },
-      alfa: {
-        active: "border-red-600 bg-red-50",
-        inactive: "border-gray-200",
-        hover: "hover:border-red-300",
-      },
-    };
+    const isActive = status === value;
+    const activeColor =
+      value === "Hadir"
+        ? "border-green-600 bg-green-50"
+        : "border-yellow-600 bg-yellow-50";
+    const hoverColor =
+      value === "Hadir" ? "hover:border-green-300" : "hover:border-yellow-300";
 
-    const colors = colorMap[value] || colorMap.present;
-    const isActive = attendanceType === value;
-
-    return `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition ${isActive
-      ? `${colors.active} shadow-md scale-[1.02]`
-      : `${colors.inactive} ${colors.hover}`
+    return `flex items-center space-x-2 p-4 rounded-lg cursor-pointer border-2 transition w-full ${isActive
+      ? `${activeColor} shadow-md scale-[1.02]`
+      : `border-gray-200 ${hoverColor}`
       }`;
   };
 
@@ -252,75 +229,45 @@ export default function AttendanceForm() {
               </FormControl>
             </FormItem>
 
-            {/* Jenis Absensi */}
+            {/* Status Absensi */}
             <FormField
               control={form.control}
-              name="attendanceType"
+              name="status"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Jenis Absensi</FormLabel>
+                  <FormLabel>Status Kehadiran</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
-                      className="flex space-x-1"
+                      className="grid grid-cols-2 gap-4"
                     >
-                      <div className="grid grid-cols-4 gap-4">
-                        <div className={getRadioClass("present")}>
-                          <RadioGroupItem
-                            value="present"
-                            id="present"
-                            className="mt-1"
-                          />
-                          <FormLabel
-                            htmlFor="present"
-                            className="cursor-pointer flex-1 m-0 font-normal"
-                          >
-                            Hadir
-                          </FormLabel>
-                        </div>
+                      <div className={getRadioClass("Hadir")}>
+                        <RadioGroupItem
+                          value="Hadir"
+                          id="Hadir"
+                          className="mt-1"
+                        />
+                        <FormLabel
+                          htmlFor="Hadir"
+                          className="cursor-pointer flex-1 m-0 font-normal"
+                        >
+                          Hadir
+                        </FormLabel>
+                      </div>
 
-                        <div className={getRadioClass("permission")}>
-                          <RadioGroupItem
-                            value="permission"
-                            id="permission"
-                            className="mt-1"
-                          />
-                          <FormLabel
-                            htmlFor="permission"
-                            className="cursor-pointer flex-1 m-0 font-normal"
-                          >
-                            Izin
-                          </FormLabel>
-                        </div>
-
-                        <div className={getRadioClass("sick")}>
-                          <RadioGroupItem
-                            value="sick"
-                            id="sick"
-                            className="mt-1"
-                          />
-                          <FormLabel
-                            htmlFor="sick"
-                            className="cursor-pointer flex-1 m-0 font-normal"
-                          >
-                            Sakit
-                          </FormLabel>
-                        </div>
-
-                        <div className={getRadioClass("alfa")}>
-                          <RadioGroupItem
-                            value="alfa"
-                            id="alfa"
-                            className="mt-1"
-                          />
-                          <FormLabel
-                            htmlFor="alfa"
-                            className="cursor-pointer flex-1 m-0 font-normal"
-                          >
-                            Alfa
-                          </FormLabel>
-                        </div>
+                      <div className={getRadioClass("Kurang")}>
+                        <RadioGroupItem
+                          value="Kurang"
+                          id="Kurang"
+                          className="mt-1"
+                        />
+                        <FormLabel
+                          htmlFor="Kurang"
+                          className="cursor-pointer flex-1 m-0 font-normal"
+                        >
+                          Kurang (Tidak Hadir)
+                        </FormLabel>
                       </div>
                     </RadioGroup>
                   </FormControl>
@@ -329,31 +276,64 @@ export default function AttendanceForm() {
               )}
             />
 
-            {/* Keterangan - Conditional */}
-            {attendanceType !== "present" && (
+            {/* Alasan Absen - Conditional */}
+            {status === "Kurang" && (
               <FormField
                 control={form.control}
-                name="remarks"
+                name="absentReason"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Keterangan</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={
-                          attendanceType === "permission"
-                            ? "Masukkan alasan izin"
-                            : attendanceType === "sick"
-                              ? "Masukkan alasan sakit"
-                              : "Masukkan keterangan alfa"
-                        }
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>Alasan Ketidakhadiran</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Pilih alasan..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[
+                          "Dinas",
+                          "DIK",
+                          "Izin",
+                          "Cuti",
+                          "Sakit",
+                          "Hamil",
+                          "BKO",
+                          "TK",
+                          "Terlambat",
+                        ].map((reason) => (
+                          <SelectItem key={reason} value={reason}>
+                            {reason}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
+            {/* Keterangan */}
+            <FormField
+              control={form.control}
+              name="remarks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Keterangan Tambahan (Opsional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Masukkan keterangan tambahan jika ada..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="pt-4 flex justify-end">
               <Button
@@ -363,7 +343,6 @@ export default function AttendanceForm() {
                   isAttendanceCompleted ||
                   isLoadingAttendance
                 }
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoadingAttendance
                   ? "Memuat..."

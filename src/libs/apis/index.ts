@@ -1,5 +1,5 @@
 import type { TEventSchema } from "../schema";
-import type { TTokenCheckResponse } from "../types";
+import type { TAttendanceAbsentReason, TTokenCheckResponse } from "../types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -179,7 +179,8 @@ export async function createAttendance(
   token: string,
   data: {
     userId?: string;
-    status?: "Hadir" | "Izin" | "Sakit" | "Alfa";
+    status?: string;
+    absentReason?: TAttendanceAbsentReason;
     note?: string;
   },
 ) {
@@ -328,7 +329,7 @@ export async function createEvent(token: string, data: TEventSchema) {
   return responseData;
 }
 
-export async function updateEvents(token: string, data:TEventSchema, id:string) {
+export async function updateEvents(token: string, data: TEventSchema, id: string) {
   const parsedToken = JSON.parse(token);
 
   const res = await fetch(`${API_URL}/events/${id}`, {
