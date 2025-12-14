@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Card } from "@/components/ui/card";
+import { formatDateTime } from "@/libs/utils";
 
 interface AbsenceData {
   dinas: number;
@@ -78,7 +79,7 @@ const LABELS: Record<string, string> = {
 export default function AttendanceChart({
   attendanceData,
 }: AttendanceChartProps) {
-  const period = attendanceData?.period?.month ?? "N/A";
+  const period = attendanceData?.period?.start ?? "N/A";
   const total = attendanceData?.total ?? 0;
   const hadir = attendanceData?.hadir ?? 0;
   const kurangData = attendanceData?.Kurang;
@@ -290,7 +291,7 @@ export default function AttendanceChart({
             <h3 className="text-lg font-semibold text-gray-900">
               Statistik Kehadiran
             </h3>
-            <p className="text-sm text-gray-600 mt-1">Periode: {period}</p>
+            <p className="text-sm text-gray-600 mt-1">Periode: {formatDateTime(period, "LONG_DATE")}</p>
           </div>
         </div>
 

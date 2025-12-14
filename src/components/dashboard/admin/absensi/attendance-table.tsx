@@ -39,7 +39,7 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
               <TableCell>
                 {item.user.jabatan}
               </TableCell>
-              <TableCell>{formatDateTime(item.date)}</TableCell>
+              <TableCell>{formatDateTime(item.date, "LONG_DATE")}</TableCell>
               <TableCell>
                 <Badge
                   variant="secondary"

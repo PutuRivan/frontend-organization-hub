@@ -59,19 +59,68 @@ export function getAttendanceStatus(status: TAttendanceStatus) {
   return config[status];
 }
 
-export function formatDateTime(dateString: string): string {
+type DateFormatOption =
+  | "LONG_DATE"
+  | "LONG_DATE_TIME"
+  | "SHORT_DATE"
+  | "SHORT_DATE_TIME";
+
+export function formatDateTime(
+  dateString: string,
+  format: DateFormatOption = "SHORT_DATE"
+): string {
   const date = new Date(dateString);
 
   if (isNaN(date.getTime())) return "-";
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
   const year = date.getFullYear();
 
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  return `${day}-${month}-${year}, ${hours}:${minutes}`;
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  switch (format) {
+    case "LONG_DATE":
+      // 14 Desember 2025
+      return `${day} ${monthNames[month - 1]} ${year}`;
+
+    case "LONG_DATE_TIME":
+      // 14 Desember 2025, 10.00 WIB
+      return `${day} ${monthNames[month - 1]} ${year}, ${hours}.${minutes} WIB`;
+
+    case "SHORT_DATE":
+      // 14 - 12 - 2025
+      return `${String(day).padStart(2, "0")} - ${String(month).padStart(
+        2,
+        "0"
+      )} - ${year}`;
+
+    case "SHORT_DATE_TIME":
+      // 14 - 12 - 2025, 10.00 WIB
+      return `${String(day).padStart(2, "0")} - ${String(month).padStart(
+        2,
+        "0"
+      )} - ${year}, ${hours}.${minutes} WIB`;
+
+    default:
+      return "-";
+  }
 }
 
 export function getInitials(name: string): string {

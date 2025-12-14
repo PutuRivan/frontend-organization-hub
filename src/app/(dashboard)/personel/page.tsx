@@ -23,12 +23,11 @@ export default function Home() {
     };
     fetchData();
   }, [token]);
-  console.log({ dashboardData })
 
   const eventMapper = {
     name: dashboardData?.upcomingEvents[0]?.name,
-    start_datetime: formatDateTime(dashboardData?.upcomingEvents[0]?.start_datetime),
-    end_datetime: formatDateTime(dashboardData?.upcomingEvents[0]?.end_datetime),
+    start_datetime: formatDateTime(dashboardData?.upcomingEvents[0]?.start_datetime, "LONG_DATE_TIME"),
+    end_datetime: formatDateTime(dashboardData?.upcomingEvents[0]?.end_datetime, "LONG_DATE_TIME"),
     place: dashboardData?.upcomingEvents[0]?.place,
     leader: dashboardData?.upcomingEvents[0]?.leader,
     category: dashboardData?.upcomingEvents[0]?.category,

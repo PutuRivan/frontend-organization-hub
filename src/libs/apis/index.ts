@@ -21,7 +21,6 @@ export async function countTable(token: string) {
       Authorization: `Bearer ${parsedToken}`,
     },
   });
-  console.log(res);
   if (!res.ok) {
     throw new Error("Gagal mengambil data count table");
   }
@@ -64,7 +63,6 @@ export async function getInventoryById(token: string, id: string) {
 
 export async function createNewInventory(token: string, formData: FormData) {
   const parsedToken = JSON.parse(token);
-  console.log(parsedToken);
   const res = await fetch(`${API_URL}/inventory`, {
     method: "POST",
     headers: {
@@ -127,7 +125,6 @@ export async function getAllAttendance(
   if (name) params.append("name", name);
   if (status) params.append("status", status);
 
-  console.log(params.toString());
   try {
     const res = await fetch(
       `${API_URL}/attendance/personel?${params.toString()}`,

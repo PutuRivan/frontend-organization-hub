@@ -25,7 +25,6 @@ export function AttendanceReport() {
     async (page: number) => {
       try {
         setLoading(true);
-        console.log({ date });
         const result = await getAllAttendance(
           token,
           page,

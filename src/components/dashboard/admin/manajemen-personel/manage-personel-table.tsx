@@ -35,9 +35,7 @@ export default function ManagePersonelTable({
 }: ManagePersonelTableProps) {
   const handleDelete = async (id: string) => {
     try {
-      console.log({ userId: id });
       const status = await deletePersonnelAction(pathname, token, id);
-      console.log(status);
       if (!status.success) {
         toast.error(status.message)
         return

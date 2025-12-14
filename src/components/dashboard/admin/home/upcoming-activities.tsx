@@ -3,6 +3,7 @@
 import { Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { TEvent } from "@/libs/types";
+import { formatDateTime } from "@/libs/utils";
 
 interface UpcomingActivitiesProps {
   events: TEvent[];
@@ -11,20 +12,6 @@ interface UpcomingActivitiesProps {
 export default function UpcomingActivities({
   events,
 }: UpcomingActivitiesProps) {
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const dateStr = date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-    const timeStr = date.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return { dateStr, timeStr };
-  };
-
   return (
     <Card className="p-6 bg-white">
       <h3 className="mb-4 text-lg font-semibold text-gray-900">
@@ -37,7 +24,7 @@ export default function UpcomingActivities({
           </p>
         ) : (
           events.slice(0, 5).map((event) => {
-            const { dateStr, timeStr } = formatDateTime(event.start_datetime);
+            const dateStr = formatDateTime(event.start_datetime.toLocaleString(), "LONG_DATE_TIME");
             return (
               <div
                 key={event.id}
@@ -49,7 +36,7 @@ export default function UpcomingActivities({
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">{event.name}</p>
                   <p className="text-xs text-gray-600">
-                    {dateStr}, {timeStr}
+                    {dateStr}
                   </p>
                   {event.place && (
                     <p className="text-xs text-gray-500 mt-1">

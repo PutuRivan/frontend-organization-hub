@@ -74,7 +74,6 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
 
   const onSubmit = async (values: TPersonelSchema) => {
     if (!user?.id) return;
-    console.log(values);
     setLoading(true);
     const formData = new FormData();
     formData.append("name", values.name);
@@ -97,7 +96,10 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
     formData.append("userId", user.id);
     try {
       const data = await createPersonel(token, formData);
-      console.log(data);
+      if (!data.success) {
+        toast.error(data.message)
+        return
+      }
       toast.success("Personel berhasil ditambahkan");
       router.push("/admin/manajemen-personel");
     } catch (error) {
