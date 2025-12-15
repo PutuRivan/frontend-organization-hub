@@ -67,7 +67,7 @@ export default function AttendanceForm() {
 
   // Get user data for form
   const fullName = user?.name || "";
-  const personnelId = user?.id || "";
+  const personelNRP = user?.nrp || "";
 
   const form = useForm<TAttendanceSchema>({
     resolver: zodResolver(attendanceSchema),
@@ -216,12 +216,12 @@ export default function AttendanceForm() {
 
             {/* ID Personel - Read Only */}
             <FormItem>
-              <FormLabel>ID Personel</FormLabel>
+              <FormLabel>NRP Personel</FormLabel>
               <FormControl>
                 <Input
                   type="text"
                   placeholder="Loading..."
-                  value={personnelId}
+                  value={personelNRP}
                   readOnly
                   disabled
                   className="bg-gray-50 cursor-not-allowed"

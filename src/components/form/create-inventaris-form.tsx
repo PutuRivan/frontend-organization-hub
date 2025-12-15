@@ -12,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,36 +30,27 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/auth-context";
-import { updateInventory } from "@/libs/apis";
+import { createNewInventory } from "@/libs/apis";
 import { createInventory, type TCreateInventory } from "@/libs/schema";
-import type { TInventory } from "@/libs/types";
-
 import { getAccessTokenFromCookie } from "@/libs/utils";
-import ImagePreview from "../create/image-preview";
-import DbImagePreview from "./db-image-preview";
-import { useRouter } from "next/navigation";
+import ImagePreview from "../dashboard/admin/inventaris-barang/create/image-preview";
 
-interface UpdateInventarisForm {
-  data: TInventory;
-}
-
-export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
+export default function CreateInventarisForm() {
   const [files, setFiles] = useState<File[]>([]);
-  const router = useRouter();
-  const { user } = useAuth();
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
-  const [isDbImageRemoved, setIsDbImageRemoved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const token = getAccessTokenFromCookie();
+
   const form = useForm<TCreateInventory>({
     resolver: zodResolver(createInventory),
     defaultValues: {
-      name: data.item_name,
-      quantity: data.quantity,
-      quantity_description: data.quantity_description,
-      category: data.category,
-      location: data.location,
-      description: data.description,
+      name: "",
+      quantity: 0,
+      quantity_description: "",
+      category: "",
+      location: "",
+      description: "",
     },
   });
 
@@ -82,45 +74,37 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
     form.setValue("image", updatedFiles);
   };
 
-  // Hapus gambar dari database
-  const handleRemoveDbImage = () => {
-    setIsDbImageRemoved(true);
-    // Reset form image field untuk memastikan gambar database tidak terkirim
-    form.setValue("image", []);
-  };
-
   const onSubmit = async (values: TCreateInventory) => {
     if (!user?.id) return;
 
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append("name", values.name ?? data.item_name);
-    formData.append("quantity", values.quantity.toString() ?? data.quantity);
-    formData.append(
-      "quantity_description",
-      values.quantity_description ?? data.quantity_description,
-    );
-    formData.append("category", values.category ?? data.category);
-    formData.append("location", values.location ?? data.location);
-    formData.append("description", values.description ?? data.description);
+    formData.append("name", values.name);
+    formData.append("quantity", values.quantity.toString());
+    formData.append("quantity_description", values.quantity_description);
+    formData.append("category", values.category);
+    formData.append("location", values.location);
+    formData.append("description", values.description ?? "");
 
     files.forEach((file) => {
       formData.append("image", file);
     });
 
     formData.append("userId", user.id);
-    try {
-      const response = await updateInventory(token, data.id, formData);
 
-      if (!response.success) {
-        toast.error(response.message);
+    try {
+      const data = await createNewInventory(token, formData);
+
+      if (!data.success) {
+        toast.error(data.message);
         return;
       }
 
-      toast.success("Item berhasil diupdate");
+      toast.success("Item berhasil ditambahkan");
       form.reset();
-      router.push("/admin/inventaris-barang");
+      setFiles([]);
+      setFilePreviews([]);
     } catch (error) {
       toast.error("Terjadi kesalahan saat submit");
       console.error(error);
@@ -153,6 +137,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
                 <FormControl>
                   <Input placeholder="quantity" type="number" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -165,6 +150,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
                 <FormControl>
                   <Input placeholder="pcs" type="text" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -175,11 +161,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    defaultValue={data.category}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
@@ -192,6 +174,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
                     </SelectContent>
                   </Select>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -204,6 +187,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
                 <FormControl>
                   <Input placeholder="Lantai 7" type="text" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -217,6 +201,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
               <FormControl>
                 <Textarea placeholder="optional" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -228,35 +213,23 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
               <FormLabel>Gambar</FormLabel>
               <FormControl>
                 <div className="w-full">
-                  {/* Jika ada image dari database dan belum dihapus → tampilkan dan tidak render dropzone */}
-                  {data.image && !isDbImageRemoved ? (
-                    <DbImagePreview
-                      filePreviews={data.image}
-                      onRemove={handleRemoveDbImage}
-                    />
-                  ) : (
-                    <>
-                      {/* Jika tidak ada image di DB atau user sudah hapus → tampilkan dropzone */}
-                      <Dropzone
-                        maxFiles={5}
-                        accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
-                        onDrop={(files) => {
-                          handleDrop(files);
-                          field.onChange(files);
-                        }}
-                      >
-                        <DropzoneEmptyState />
-                        <DropzoneContent />
-                      </Dropzone>
-                    </>
-                  )}
-
-                  {/* Preview gambar yang diupload user */}
+                  <Dropzone
+                    maxFiles={5}
+                    accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
+                    onDrop={(files) => {
+                      handleDrop(files);
+                      field.onChange(files); // update react-hook-form
+                    }}
+                  >
+                    <DropzoneEmptyState />
+                    <DropzoneContent />
+                  </Dropzone>
                   {filePreviews.length > 0 && (
                     <ImagePreview
                       filePreviews={filePreviews}
                       onRemove={(index) => {
                         handleRemoveImage(index);
+                        // update form value juga
                         const newFiles = files.filter((_, i) => i !== index);
                         field.onChange(newFiles);
                       }}
@@ -264,6 +237,7 @@ export default function UpdateInventarisForm({ data }: UpdateInventarisForm) {
                   )}
                 </div>
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

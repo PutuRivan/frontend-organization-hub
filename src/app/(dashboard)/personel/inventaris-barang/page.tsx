@@ -1,5 +1,7 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -7,6 +9,7 @@ import InventoryPagination from "@/components/dashboard/admin/inventaris-barang/
 import InventoryTable from "@/components/dashboard/admin/inventaris-barang/inventory-table";
 import SearchBar from "@/components/dashboard/admin/inventaris-barang/search-bar";
 import HeaderContent from "@/components/dashboard/base/header-content";
+import { Button } from "@/components/ui/button";
 import { getInventory } from "@/libs/apis";
 import type { TInventory } from "@/libs/types";
 import { getAccessTokenFromCookie } from "@/libs/utils";
@@ -60,9 +63,15 @@ export default function InventoryPage() {
         title="Inventaris Barang"
         description="Lihat dan kelola daftar inventaris yang tersedia."
       />
-      {/* Search */}
+      {/* Search & Add */}
       <div className="mb-6 flex justify-between">
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <Link href={"inventaris-barang/create"}>
+          <Button>
+            <Plus className="h-4 w-4" />
+            Tambah Barang
+          </Button>
+        </Link>
       </div>
 
       {/* Table */}
