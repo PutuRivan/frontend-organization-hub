@@ -48,7 +48,10 @@ export default function Home() {
         description="Berikut adalah ringkasan aktivitas Anda hari ini."
       />
 
-      <InfoCards user={user} events={eventMapper} />
+      <InfoCards
+        user={user}
+        events={eventMapper}
+      />
 
       <HeaderContent
         title={`Jadwal Kegiatan Minggu Ini`}

@@ -1,63 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import "dayjs/locale/id";
 import CalendarSidebar from "@/components/dashboard/personel/jadwal-kegiatan/calendar-sidebar";
 import EmptyState from "@/components/dashboard/personel/jadwal-kegiatan/empty-state";
 import EventCard from "@/components/dashboard/personel/jadwal-kegiatan/event-card";
+import { Button } from "@/components/ui/button";
+import { getAllEvents } from "@/libs/apis";
+import type { TEvent } from "@/libs/types";
+import { getAccessTokenFromCookie } from "@/libs/utils";
 
-type EventType = "semua" | "rapat" | "pelatihan" | "workshop";
+dayjs.locale("id");
 
 interface Event {
   id: string;
   date: number;
   month: string;
   time: string;
-  type: "Rapat" | "Pelatihan" | "Workshop";
+  type: string;
   title: string;
   description: string;
 }
 
-const events: Event[] = [
-  {
-    id: "1",
-    date: 15,
-    month: "Juli",
-    time: "10:00 WIB",
-    type: "Rapat",
-    title: "Rapat Koordinasi Tim Marketing",
-    description: "Membahas strategi kampanye Q3 dan alokasi anggaran.",
-  },
-  {
-    id: "2",
-    date: 22,
-    month: "Juli",
-    time: "09:00 WIB",
-    type: "Pelatihan",
-    title: "Pelatihan Desain Produk Dasar",
-    description: "Sesi pelatihan dasar untuk anggota tim baru.",
-  },
-  {
-    id: "3",
-    date: 28,
-    month: "Juli",
-    time: "14:00 WIB",
-    type: "Workshop",
-    title: "Workshop Fotografi Mobile",
-    description:
-      "Pempelajari teknik-teknik dasar fotografi hanya dengan menggunakan smartphone.",
-  },
-];
-
 export default function Home() {
-  const [selectedFilter, setSelectedFilter] = useState<EventType>("semua");
+  const [selectedFilter, setSelectedFilter] = useState<string>("semua"); // Changed to string to accommodate dynamic types
+  const [events, setEvents] = useState<Event[]>([]);
+  const [rawEvents, setRawEvents] = useState<TEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const token = getAccessTokenFromCookie();
+        if (!token) return;
+
+        const response = await getAllEvents(token, 1, 100); // Fetch up to 100 events
+        if (response?.data) {
+          setRawEvents(response.data);
+          const mappedEvents: Event[] = response.data.map((e: TEvent) => {
+            const startDate = dayjs(e.start_datetime);
+            return {
+              id: e.id,
+              date: startDate.date(),
+              month: startDate.format("MMMM"),
+              time: startDate.format("HH:mm") + " WIB",
+              type: e.category || "Kegiatan",
+              title: e.name,
+              description: e.place || "Tidak ada lokasi",
+            };
+          });
+          setEvents(mappedEvents);
+        }
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const filteredEvents =
     selectedFilter === "semua"
       ? events
-      : events.filter((event) => event.type.toLowerCase() === selectedFilter);
+      : events.filter(
+        (event) => event.type.toLowerCase() === selectedFilter.toLowerCase(),
+      );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <main className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-slate-900 mb-6">
           Jadwal Kegiatan Anda
@@ -66,11 +80,38 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Kiri: Filter + Events */}
           <div className="flex-1 lg:max-w-3xl">
-            {/* ... (Bagian Filter Buttons dan List tetap sama) ... */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
+              {[
+                "semua",
+                "Rapat",
+                "Pelatihan",
+                "Workshop",
+                "Seminar",
+                "Lainnya",
+              ].map((type) => (
+                <Button
+                  key={type}
+                  variant={
+                    selectedFilter.toLowerCase() === type.toLowerCase()
+                      ? "default"
+                      : "outline"
+                  }
+                  onClick={() => setSelectedFilter(type)}
+                  className="capitalize rounded-full px-6"
+                  size="sm"
+                >
+                  {type}
+                </Button>
+              ))}
+            </div>
 
             {/* Events List */}
             <div className="space-y-4">
-              {filteredEvents.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-10 text-slate-500">
+                  Memuat data...
+                </div>
+              ) : filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))
@@ -80,13 +121,15 @@ export default function Home() {
             </div>
           </div>
 
+
           {/* Kanan: Kalender */}
           <div className="lg:w-[400px] xl:w-[450px]">
             {" "}
             {/* Sedikit penyesuaian lebar */}
             {/* UPDATED: Mengirim data events ke sidebar */}
-            <CalendarSidebar events={events} />
+            <CalendarSidebar events={rawEvents} />
           </div>
+
         </div>
       </div>
     </main>

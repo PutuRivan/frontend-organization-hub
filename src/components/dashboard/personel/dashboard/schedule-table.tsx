@@ -32,9 +32,9 @@ export function ScheduleTable({ events }: ScheduleTableProps) {
           <TableBody>
             {schedules.map((schedule, idx) => (
               <TableRow key={idx}>
-                <TableCell>{formatDateTime(schedule.start_datetime.toString())}</TableCell>
+                <TableCell>{formatDateTime(schedule.start_datetime.toString(), "LONG_DATE")}</TableCell>
                 <TableCell>{schedule.name}</TableCell>
-                <TableCell>{formatDateTime(schedule.end_datetime.toString())}</TableCell>
+                <TableCell>{formatDateTime(schedule.end_datetime.toString(), "TIME")}</TableCell>
                 <TableCell>{schedule.place}</TableCell>
               </TableRow>
             ))}

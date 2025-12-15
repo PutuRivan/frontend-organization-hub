@@ -63,7 +63,8 @@ type DateFormatOption =
   | "LONG_DATE"
   | "LONG_DATE_TIME"
   | "SHORT_DATE"
-  | "SHORT_DATE_TIME";
+  | "SHORT_DATE_TIME"
+  | "TIME";
 
 export function formatDateTime(
   dateString: string,
@@ -117,6 +118,9 @@ export function formatDateTime(
         2,
         "0"
       )} - ${year}, ${hours}.${minutes} WIB`;
+
+    case "TIME":
+      return `${hours}.${minutes} WIB`;
 
     default:
       return "-";

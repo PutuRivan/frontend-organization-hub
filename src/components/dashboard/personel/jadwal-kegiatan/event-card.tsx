@@ -1,24 +1,29 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 interface Event {
   id: string;
   date: number;
   month: string;
   time: string;
-  type: 'Rapat' | 'Pelatihan' | 'Workshop';
+  type: string;
   title: string;
   description: string;
 }
 
 const typeColors: Record<string, { badge: string; text: string }> = {
-  Rapat: { badge: 'bg-blue-100 text-blue-700', text: 'bg-blue-200' },
-  Pelatihan: { badge: 'bg-green-100 text-green-700', text: 'bg-green-200' },
-  Workshop: { badge: 'bg-purple-100 text-purple-700', text: 'bg-purple-200' },
+  Rapat: { badge: "bg-blue-100 text-blue-700", text: "bg-blue-200" },
+  Pelatihan: { badge: "bg-green-100 text-green-700", text: "bg-green-200" },
+  Workshop: { badge: "bg-purple-100 text-purple-700", text: "bg-purple-200" },
+};
+
+const defaultColor = {
+  badge: "bg-slate-100 text-slate-700",
+  text: "bg-slate-200",
 };
 
 export default function EventCard({ event }: { event: Event }) {
-  const colors = typeColors[event.type] || typeColors.Rapat;
+  const colors = typeColors[event.type] || defaultColor;
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
@@ -39,7 +44,9 @@ export default function EventCard({ event }: { event: Event }) {
               {event.type}
             </Badge>
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">{event.title}</h3>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">
+            {event.title}
+          </h3>
           <p className="text-sm text-slate-600">{event.description}</p>
         </div>
       </div>

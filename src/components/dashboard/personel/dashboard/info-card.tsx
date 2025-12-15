@@ -1,6 +1,7 @@
 import { Calendar, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TEvent, TUser } from "@/libs/types";
+import { formatDateTime } from '@/libs/utils';
 
 interface InfoCardsProps {
   user: TUser | null;
@@ -21,9 +22,8 @@ export function InfoCards({ user, events }: InfoCardsProps) {
       title: "Status Kehadiran",
       icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
       details: [
-        { label: user?.attendance ? "Absen Masuk" : "Tidak Hadir", value: user?.attendance?.time_in ?? "" },
-        { label: user?.attendance ? "Absen Pulang" : "", value: user?.attendance?.time_out ?? "" },
-        { label: user?.attendance?.absent_reason ? "Alasan" : "", value: user?.attendance?.absent_reason ?? "" },
+        { label: user?.attendance ? "Absen" : "Tidak Hadir", value: `${formatDateTime(user?.attendance?.time_in ?? "", "TIME")} - ${formatDateTime(user?.attendance?.time_out ?? "", "TIME")}` },
+        { label: user?.attendance?.absent_reason ? "Keterangan" : "", value: user?.attendance?.absent_reason ?? "" },
       ],
     },
     {
@@ -37,7 +37,7 @@ export function InfoCards({ user, events }: InfoCardsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-5">
       {cards.map((card, idx) => (
         <Card key={idx} className="border border-border">
-          <CardHeader className="pb-3">
+          <CardHeader className="">
             <div className="flex items-start justify-between">
               <CardTitle className="text-lg font-semibold">
                 {card.title}
@@ -49,7 +49,7 @@ export function InfoCards({ user, events }: InfoCardsProps) {
               )}
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
+          <CardContent className="space-y-2">
             {card.details.map((detail, detailIdx) => (
               <div key={detailIdx} className="text-sm">
                 {detail.value ? (

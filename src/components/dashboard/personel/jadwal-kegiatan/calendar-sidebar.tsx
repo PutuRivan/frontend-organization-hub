@@ -1,41 +1,40 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import dayjs from 'dayjs';
-import 'dayjs/locale/id';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCalendarView } from "@/hooks/use-calendar-view";
+import type { TEvent } from "@/libs/types";
 
-dayjs.locale('id');
-
-// Samakan tipe data dengan yang ada di parent (Home)
-interface Event {
-  id: string;
-  date: number;
-  month: string;
-  time: string;
-  type: 'Rapat' | 'Pelatihan' | 'Workshop';
-  title: string;
-  description: string;
-}
+dayjs.locale("id");
 
 interface CalendarSidebarProps {
-  events: Event[];
+  events: TEvent[];
 }
 
 // Helper untuk warna background event di kalender (versi mini)
-const getTypeColor = (type: string) => {
-  switch (type) {
-    case 'Rapat': return 'bg-blue-200 text-blue-800';
-    case 'Pelatihan': return 'bg-green-200 text-green-800';
-    case 'Workshop': return 'bg-purple-200 text-purple-800';
-    default: return 'bg-slate-200 text-slate-800';
+const getTypeColor = (type: string | null) => {
+  switch (type?.toLowerCase()) {
+    case "rapat":
+    case "meeting":
+      return "bg-blue-200 text-blue-800";
+    case "pelatihan":
+    case "training":
+      return "bg-green-200 text-green-800";
+    case "workshop":
+      return "bg-purple-200 text-purple-800";
+    case "seminar":
+      return "bg-orange-200 text-orange-800";
+    default:
+      return "bg-slate-200 text-slate-800";
   }
 };
 
 export default function CalendarSidebar({ events }: CalendarSidebarProps) {
-  // Set default start date ke Juli 2024 agar sesuai dengan data dummy Anda untuk demo ini
-  // Jika ingin default bulan sekarang, ganti dayjs('2024-07-01') menjadi dayjs()
-  const [currentMonth, setCurrentMonth] = useState(dayjs('2024-07-01'));
+  const { currentDate, handleNextMonth, handlePreviousMonth } =
+    useCalendarView();
+  const currentMonth = dayjs(currentDate);
 
   const startDay = currentMonth.startOf("month").startOf("week");
   const endDay = currentMonth.endOf("month").endOf("week");
@@ -50,28 +49,29 @@ export default function CalendarSidebar({ events }: CalendarSidebarProps) {
 
   return (
     <div className="bg-white rounded-xl shadow p-4 w-full sticky top-8">
-
       {/* Header Navigasi */}
       <div className="flex items-center justify-between mb-4">
-        <button
+        <Button
           type="button"
-          onClick={() => setCurrentMonth(currentMonth.subtract(1, "month"))}
-          className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+          onClick={handlePreviousMonth}
+          variant={"link"}
+          size={"icon"}
         >
           <ChevronLeft className="w-5 h-5" />
-        </button>
+        </Button>
 
         <h2 className="font-semibold text-slate-800 capitalize">
           {currentMonth.format("MMMM YYYY")}
         </h2>
 
-        <button
+        <Button
           type="button"
-          onClick={() => setCurrentMonth(currentMonth.add(1, "month"))}
-          className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+          onClick={handleNextMonth}
+          variant={"link"}
+          size={"icon"}
         >
           <ChevronRight className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
 
       {/* Header Hari */}
@@ -92,15 +92,16 @@ export default function CalendarSidebar({ events }: CalendarSidebarProps) {
           const isToday = day.isSame(dayjs(), "day");
 
           // FILTER LOGIC:
-          // Mencocokkan tanggal (number) dan nama bulan (string) dari data events
-          // Note: day.date() return 1-31, day.format('MMMM') return "Juli", "Agustus", dst (karena locale id)
-          const eventsToday = events.filter(
-            (e) => e.date === day.date() && e.month === day.format('MMMM')
+          // Mencocokkan tanggal penuh menggunakan dayjs
+          const eventsToday = events.filter((e) =>
+            dayjs(e.start_datetime).isSame(day, "day"),
           );
 
           return (
-            <div key={index} className={`min-h-[80px] border border-transparent hover:border-slate-100 rounded p-1 flex flex-col items-center transition-all ${!isCurrentMonth ? 'opacity-40' : ''}`}>
-              
+            <div
+              key={index}
+              className={`min-h-20 border border-transparent hover:border-slate-100 rounded p-1 flex flex-col items-center transition-all ${!isCurrentMonth ? "opacity-40" : ""}`}
+            >
               {/* Tanggal Angka */}
               <div
                 className={`flex items-center justify-center rounded-full w-7 h-7 text-sm mb-1 font-medium
@@ -115,11 +116,11 @@ export default function CalendarSidebar({ events }: CalendarSidebarProps) {
                 {eventsToday.map((event) => (
                   <div
                     key={event.id}
-                    className={`${getTypeColor(event.type)} text-[9px] px-1.5 py-0.5 rounded truncate w-full text-center font-medium`}
-                    title={event.title} // Tooltip native saat hover
+                    className={`${getTypeColor(event.category)} text-[9px] px-1.5 py-0.5 rounded truncate w-full text-center font-medium capitalize`}
+                    title={event.name} // Tooltip native saat hover
                   >
                     {/* Menampilkan Judul Singkat di Kalender */}
-                    {event.type}
+                    {event.category || "Event"}
                   </div>
                 ))}
               </div>
@@ -127,7 +128,6 @@ export default function CalendarSidebar({ events }: CalendarSidebarProps) {
           );
         })}
       </div>
-
     </div>
   );
-} 
+}
