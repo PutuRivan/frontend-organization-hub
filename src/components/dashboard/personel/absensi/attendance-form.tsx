@@ -90,7 +90,8 @@ export default function AttendanceForm() {
         }
 
         const todayAttendance = await getTodayAttendance(token, user?.id ?? "");
-
+        form.setValue("status", todayAttendance?.status ?? "Hadir");
+        form.setValue("absentReason", todayAttendance?.AbsentReason ?? "");
         // Check if attendance is completed (has time_out)
         if (todayAttendance?.time_out) {
           setIsAttendanceCompleted(true);
@@ -104,7 +105,7 @@ export default function AttendanceForm() {
     };
 
     checkTodayAttendance();
-  }, [user?.id]);
+  }, [user?.id, form]);
 
   const onSubmit = async (values: TAttendanceSchema) => {
     try {
