@@ -54,8 +54,15 @@ const formatAttendanceTime = (date: Date): string => {
   return formattedDate.replace(",", ", ").replace(/:\d{2}/, "") + " WIB.";
 };
 
-export default function AttendanceForm() {
-  const { user } = useAuth();
+interface AttendanceFormProps {
+  user: {
+    id: string;
+    name: string;
+    nrp: string;
+  };
+}
+
+export default function AttendanceForm({ user }: AttendanceFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<
     "success" | "error" | "duplicate"
@@ -66,8 +73,8 @@ export default function AttendanceForm() {
   const [isLoadingAttendance, setIsLoadingAttendance] = useState(true);
 
   // Get user data for form
-  const fullName = user?.name || "";
-  const personelNRP = user?.nrp || "";
+  const fullName = user.name || "";
+  const personelNRP = user.nrp || "";
 
   const form = useForm<TAttendanceSchema>({
     resolver: zodResolver(attendanceSchema),
@@ -89,8 +96,8 @@ export default function AttendanceForm() {
           return;
         }
 
-        const todayAttendance = await getTodayAttendance(token, user?.id ?? "");
-
+        const todayAttendance = await getTodayAttendance(token, user.id);
+        console.log({todayAttendance})
         // Check if attendance is completed (has time_out)
         if (todayAttendance?.time_out) {
           setIsAttendanceCompleted(true);
@@ -104,7 +111,7 @@ export default function AttendanceForm() {
     };
 
     checkTodayAttendance();
-  }, [user?.id]);
+  }, [user.id]);
 
   const onSubmit = async (values: TAttendanceSchema) => {
     try {
@@ -123,8 +130,10 @@ export default function AttendanceForm() {
         status?: string;
         absentReason?: TAttendanceAbsentReason;
         note?: string;
+        userId?: string;
       } = {
         status: values.status,
+        userId: user.id,
       };
 
       if (values.status === "Kurang" && values.absentReason) {

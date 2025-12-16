@@ -1,4 +1,5 @@
 import { Eye, Pencil } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +46,6 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
                   ? item.AbsentReason
                   : "Default";
 
-            console.log(attendanceStatus);
             return (
               <TableRow key={item.id}>
                 <TableCell>{item.name}</TableCell>
@@ -60,12 +60,13 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="link" size="icon">
-                    <Eye />
-                  </Button>
-                  <Button variant="link" size="icon">
-                    <Pencil />
-                  </Button>
+                  {!attendanceStatus && (
+                    <Link href={`/admin/absensi/create/${item.id}`}>
+                      <Button variant="link" size="icon">
+                        <Pencil />
+                      </Button>
+                    </Link>
+                  )}
                 </TableCell>
               </TableRow>
             );

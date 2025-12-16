@@ -126,9 +126,9 @@ export async function getAllAttendance(
   if (status) params.append("status", status);
 
   try {
-    const res = await fetch(  
+    const res = await fetch(
       `${API_URL}/attendance/personel?${params.toString()}`,
-      { 
+      {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -150,10 +150,10 @@ export async function getAllAttendance(
   }
 }
 
-export async function getTodayAttendance(token: string) {
+export async function getTodayAttendance(token: string, userId: string) {
   const parsedToken = JSON.parse(token);
 
-  const res = await fetch(`${API_URL}/attendance/today`, {
+  const res = await fetch(`${API_URL}/attendance/today/${userId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
