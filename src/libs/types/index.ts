@@ -24,7 +24,7 @@ export type TAttandance = {
   time_in: string | null;
   time_out: string | null;
   status: TAttendanceStatus;
-  absent_reason: TAttendanceAbsentReason;
+  AbsentReason: TAttendanceAbsentReason;
   note: string | null;
   created_at: string;
   updated_at: string;

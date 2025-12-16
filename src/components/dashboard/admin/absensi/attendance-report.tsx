@@ -1,9 +1,10 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
+/** biome-ignore-all lint/suspicious/noImplicitAnyLet: <explanation> */
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { getAllAttendance } from "@/libs/apis";
-import type { TAttandance } from "@/libs/types";
+import { getAllAttendance, getAllPersonel } from "@/libs/apis";
 import { getAccessTokenFromCookie, getTodayDate } from "@/libs/utils";
 import AttendanceFilterContainer from "./attendance-filter-container";
 import AttendancePagination from "./attendance-pagination";
@@ -12,9 +13,10 @@ import AttendanceTable from "./attendance-table";
 export function AttendanceReport() {
   const [date, setDate] = useState(getTodayDate());
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("Hadir");
+  const [status, setStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [data, setData] = useState<TAttandance[]>([]);
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const [data, setData] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 5;
@@ -25,19 +27,59 @@ export function AttendanceReport() {
     async (page: number) => {
       try {
         setLoading(true);
-        const result = await getAllAttendance(
-          token,
-          page,
-          itemsPerPage,
-          date,
-          search,
-          status
+
+        // Check if there are any filters applied
+        // Default state: today's date, empty search, empty status
+        const isDefaultDate = date === getTodayDate();
+        const isFiltered = search !== "" || status !== "" || !isDefaultDate;
+
+        let result;
+        let mappedData = [];
+
+        if (isFiltered) {
+          // If filtered, fetch from getAllAttendance
+          result = await getAllAttendance(
+            token,
+            page,
+            itemsPerPage,
+            date,
+            search,
+            status
+          );
+
+          // Normalize getAllAttendance data for the table
+          // Attendance object -> { ..., name: user.name, jabatan: user.jabatan }
+          mappedData = (result.data || []).map((item: any) => ({
+            ...item,
+            name: item.user?.name,
+            jabatan: item.user?.jabatan,
+          }));
+        } else {
+          // If no filters (initial state), fetch from getAllPersonel
+          result = await getAllPersonel(token, page, itemsPerPage);
+
+          // Normalize getAllPersonel data for the table
+          // User object -> { ..., status: user.attendance[0]?.status, AbsentReason: user.attendance[0]?.AbsentReason }
+          mappedData = (result.data || []).map((item: any) => {
+            const attendance = item.attendance?.[0];
+            return {
+              ...item,
+              status: attendance?.status,
+              AbsentReason: attendance?.AbsentReason,
+            };
+          });
+        }
+
+        setData(mappedData);
+        setTotalItems(
+          isFiltered
+            ? result.pagination?.totalData || 0
+            : result.pagination?.totalUser || 0
         );
-        setData(result.data || []);
-        setTotalItems(result.pagination?.totalData || 0);
       } catch (error) {
         console.error(error);
         toast.error("Terjadi Kesalahan saat Mengambil Data");
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -46,17 +88,14 @@ export function AttendanceReport() {
   );
 
   useEffect(() => {
+    // Reset page to 1 if search/status/date changes? 
+    // Usually good UX, but might cause loop if not careful.
+    // The user handles calling setCurrentPage(1) in the FilterContainer explicitly?
+    // Let's just call fetchData when page or dependencies change.
+    // However, if search/status changes, we usually want to go to page 1.
+    // Let's assume the FilterContainer handles setPage(1).
     fetchData(currentPage);
   }, [fetchData, currentPage]);
-
-  const filteredData = useMemo(() => {
-    if (!search.trim()) return data;
-
-    const normalizedQuery = search.toLowerCase();
-    return data.filter((item) =>
-      item.user?.name?.toLowerCase().includes(normalizedQuery)
-    );
-  }, [data, search]);
 
   const handleReset = () => {
     setDate(getTodayDate());
@@ -85,13 +124,13 @@ export function AttendanceReport() {
           Memuat data...
         </p>
       ) : (
-        <AttendanceTable data={filteredData} />
+        <AttendanceTable data={data} />
       )}
 
       {/* Pagination */}
       <AttendancePagination
         searchTerm={search}
-        filteredData={filteredData}
+        filteredData={data}
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         setCurrentPage={setCurrentPage}

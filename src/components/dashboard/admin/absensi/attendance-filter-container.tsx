@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { TAttendanceAbsentReason } from "@/libs/types";
 
 interface AttendanceFilterContainerProps {
   date: string;
@@ -22,6 +23,21 @@ interface AttendanceFilterContainerProps {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   handleReset: () => void;
 }
+
+export const AttendanceAbsentReasonMap: Record<
+  TAttendanceAbsentReason,
+  string
+> = {
+  Dinas: "Dinas",
+  DIK: "DIK",
+  Izin: "Izin",
+  Cuti: "Cuti",
+  Sakit: "Sakit",
+  Hamil: "Hamil",
+  BKO: "BKO",
+  TK: "Tanpa Keterangan",
+  Terlambat: "Terlambat",
+};
 
 export default function AttendanceFilterContainer({
   date,
@@ -78,10 +94,16 @@ export default function AttendanceFilterContainer({
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Hadir">Hadir</SelectItem>
-              <SelectItem value="Izin">Izin</SelectItem>
-              <SelectItem value="Sakit">Sakit</SelectItem>
-              <SelectItem value="Alfa">Alfa</SelectItem>
+              <SelectItem key={"Hadir"} value={"Hadir"}>
+                Hadir
+              </SelectItem>
+              {Object.entries(AttendanceAbsentReasonMap).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>

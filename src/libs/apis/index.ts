@@ -126,9 +126,9 @@ export async function getAllAttendance(
   if (status) params.append("status", status);
 
   try {
-    const res = await fetch(
+    const res = await fetch(  
       `${API_URL}/attendance/personel?${params.toString()}`,
-      {
+      { 
         method: "GET",
         headers: {
           "Content-Type": "application/json",

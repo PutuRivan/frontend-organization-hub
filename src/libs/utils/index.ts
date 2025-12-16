@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import Cookies from "js-cookie";
 import { twMerge } from "tailwind-merge";
-import type { TAttendanceStatus, TUser } from "../types";
+import type { TAttendanceAbsentReason, TAttendanceStatus, TUser } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -48,12 +48,20 @@ export function getInventoryCategory(category: string) {
   }
 };
 
-export function getAttendanceStatus(status: TAttendanceStatus) {
+export function getAttendanceStatus(status: TAttendanceStatus | TAttendanceAbsentReason | "Default") {
   const config: Record<string, { label: string; className: string }> = {
     Hadir: { label: "Hadir", className: "bg-green-100 text-green-800" },
-    Izin: { label: "Izin", className: "bg-yellow-100 text-yellow-800" },
-    Alfa: { label: "Alpha", className: "bg-red-100 text-red-800" },
-    Sakit: { label: "Sakit", className: "bg-blue-100 text-blue-800" },
+    Kurang: { label: "Kurang", className: "bg-red-100 text-red-800" },
+    Dinas: { label: "Dinas", className: "bg-red-100 text-red-800" },
+    DIK: { label: "DIK", className: "bg-red-100 text-red-800" },
+    Izin: { label: "Izin", className: "bg-red-100 text-red-800" },
+    Cuti: { label: "Cuti", className: "bg-red-100 text-red-800" },
+    Sakit: { label: "Sakit", className: "bg-red-100 text-red-800" },
+    Hamil: { label: "Hamil", className: "bg-red-100 text-red-800" },
+    BKO: { label: "BKO", className: "bg-red-100 text-red-800" },
+    TK: { label: "TK", className: "bg-red-100 text-red-800" },
+    Terlambat: { label: "Terlambat", className: "bg-red-100 text-red-800" },
+    Default: { label: "-", className: "bg-gray-100 text-gray-800" },
   };
 
   return config[status];
