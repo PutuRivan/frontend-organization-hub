@@ -1,7 +1,8 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
-/** biome-ignore-all lint/suspicious/noImplicitAnyLet: <explanation> */
+/** biome-ignore-all lint/suspicious/noExplicitAny: explicit any is needed for dynamic data */
+/** biome-ignore-all lint/suspicious/noImplicitAnyLet: variable initialized later */
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getAllAttendance, getAllPersonel } from "@/libs/apis";
@@ -11,9 +12,10 @@ import AttendancePagination from "./attendance-pagination";
 import AttendanceTable from "./attendance-table";
 
 export function AttendanceReport() {
-  const [date, setDate] = useState(getTodayDate());
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const searchParams = useSearchParams();
+  const [date, setDate] = useState(searchParams.get("date") || getTodayDate());
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [status, setStatus] = useState(searchParams.get("status") || "");
   const [currentPage, setCurrentPage] = useState(1);
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const [data, setData] = useState<any[]>([]);
@@ -44,7 +46,7 @@ export function AttendanceReport() {
             itemsPerPage,
             date,
             search,
-            status
+            status,
           );
 
           // Normalize getAllAttendance data for the table
@@ -74,7 +76,7 @@ export function AttendanceReport() {
         setTotalItems(
           isFiltered
             ? result.pagination?.totalData || 0
-            : result.pagination?.totalUser || 0
+            : result.pagination?.totalUser || 0,
         );
       } catch (error) {
         console.error(error);
@@ -84,11 +86,11 @@ export function AttendanceReport() {
         setLoading(false);
       }
     },
-    [token, date, search, status]
+    [token, date, search, status],
   );
 
   useEffect(() => {
-    // Reset page to 1 if search/status/date changes? 
+    // Reset page to 1 if search/status/date changes?
     // Usually good UX, but might cause loop if not careful.
     // The user handles calling setCurrentPage(1) in the FilterContainer explicitly?
     // Let's just call fetchData when page or dependencies change.

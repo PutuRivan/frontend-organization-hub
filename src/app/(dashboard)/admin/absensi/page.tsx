@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AttendanceReport } from "@/components/dashboard/admin/absensi/attendance-report";
 import HeaderContent from "@/components/dashboard/base/header-content";
 
@@ -8,7 +9,9 @@ export default function Page() {
         title="Rekap Kehadiran Personel"
         description="Lihat dan kelola rekapitulasi kehadiran seluruh personel."
       />
-      <AttendanceReport />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AttendanceReport />
+      </Suspense>
     </main>
   )
 }

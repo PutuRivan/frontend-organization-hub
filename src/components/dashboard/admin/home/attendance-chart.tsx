@@ -1,5 +1,7 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   Cell,
   Label,
@@ -8,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDateTime } from "@/libs/utils";
 
@@ -172,6 +175,7 @@ export default function AttendanceChart({
       ]
       : breakdownData.filter((d) => d.value > 0);
 
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const renderChart = (data: any[], centerLabel: string, subLabel: string) => (
     <div className="flex justify-center relative">
       <ResponsiveContainer width="100%" height={280}>
@@ -187,7 +191,12 @@ export default function AttendanceChart({
             stroke="none"
           >
             {data.map((entry: any, index: number) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.color}
+                className="cursor-pointer"
+                onClick={() => handleLegendClick(entry.key)}
+              />
             ))}
             <Label
               content={({ viewBox }) => {
@@ -241,12 +250,39 @@ export default function AttendanceChart({
     </div>
   );
 
+  const router = useRouter();
+
+  const handleLegendClick = (key: string) => {
+    if (key === "empty") return;
+
+    const mapping: Record<string, string> = {
+      hadir: "Hadir",
+      kurang: "Kurang", // Note: The filter dropdown might not list "Kurang", but we pass it anyway.
+      dinas: "Dinas",
+      dik: "DIK",
+      izin: "Izin",
+      cuti: "Cuti",
+      sakit: "Sakit",
+      hamil: "Hamil",
+      bko: "BKO",
+      tk: "TK",
+      terlambat: "Terlambat",
+    };
+
+    const status = mapping[key];
+    if (status) {
+      router.push(`/admin/absensi?status=${status}`);
+    }
+  };
+
   const renderLegend = (data: any[]) => (
     <div className="flex flex-col gap-3 pr-2">
       {data.map((item: any) => (
-        <div
+        <Button
           key={item.key}
-          className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-gray-100"
+          variant="outline"
+          className="flex items-center justify-between rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-gray-100 cursor-pointer"
+          onClick={() => handleLegendClick(item.key)}
         >
           <div className="flex items-center gap-3">
             <div
@@ -265,7 +301,7 @@ export default function AttendanceChart({
               ({item.percentage}%)
             </span>
           </div>
-        </div>
+        </Button>
       ))}
 
       <div className="pt-3 mt-auto border-t-2 border-gray-200">
@@ -291,7 +327,9 @@ export default function AttendanceChart({
             <h3 className="text-lg font-semibold text-gray-900">
               Statistik Kehadiran
             </h3>
-            <p className="text-sm text-gray-600 mt-1">Periode: {formatDateTime(period, "LONG_DATE")}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Periode: {formatDateTime(period, "LONG_DATE")}
+            </p>
           </div>
         </div>
 
