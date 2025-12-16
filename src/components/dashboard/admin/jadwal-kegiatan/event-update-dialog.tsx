@@ -61,6 +61,7 @@ export default function EventUpdateDialog({
         dress_code: event.dress_code || "",
         start_date: format(new Date(event.start_datetime), "yyyy-MM-dd HH:mm"),
         end_date: format(new Date(event.end_datetime), "yyyy-MM-dd HH:mm"),
+        visibility: event.visibility,
       });
     }
   }, [event, open, reset]);

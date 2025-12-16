@@ -63,6 +63,7 @@ export const eventSchema = z.object({
   dress_code: z.string().optional(),
   start_date: z.string(),
   end_date: z.string(),
+  visibility: z.enum(["Global", "Private"]),
 })
 
 export type TEventSchema = z.infer<typeof eventSchema>

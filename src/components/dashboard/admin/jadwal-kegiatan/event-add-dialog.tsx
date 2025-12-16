@@ -55,6 +55,7 @@ export default function EventAddDialog({
       dress_code: "",
       start_date: "",
       end_date: "",
+      visibility: "Global",
     },
   });
 

@@ -47,6 +47,8 @@ export type TInventory = {
   updated_at: Date;
 };
 
+export type TEventVisibility = "Global" | "Private";
+
 export type TEvent = {
   id: string;
   name: string;
@@ -57,6 +59,7 @@ export type TEvent = {
   created_by: string;
   start_datetime: string | Date;
   end_datetime: string | Date;
+  visibility: TEventVisibility;
 };
 
 export type TTokenCheckResponse = {
