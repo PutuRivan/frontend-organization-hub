@@ -1,14 +1,17 @@
+import { Eye, Pen, Trash } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { deleteEventAction } from "@/libs/action";
+import type { TEvent } from "@/libs/types";
 
-interface Event {
-  id: string;
-  date: number;
-  month: string;
-  time: string;
-  type: string;
-  title: string;
-  description: string;
+interface EventCardProps {
+  event: TEvent;
+  token: string;
+  pathname: string;
+  fetchEvents: () => void;
 }
 
 const typeColors: Record<string, { badge: string; text: string }> = {
@@ -22,8 +25,30 @@ const defaultColor = {
   text: "bg-slate-200",
 };
 
-export default function EventCard({ event }: { event: Event }) {
+export default function EventCard({
+  event,
+  token,
+  pathname,
+  fetchEvents,
+}: EventCardProps) {
   const colors = typeColors[event.type] || defaultColor;
+  const [selectedEvent, setSelectedEvent] = useState<TEvent | null>(null);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
+  const handleDelete = async (id: string) => {
+    const response = await deleteEventAction(pathname, token, id);
+    if (!response.success) {
+      toast.error(response.message);
+    } else {
+      toast.success(response.message);
+      fetchEvents();
+    }
+  };
+
+  const handleUpdate = (event: TEvent) => {
+    setSelectedEvent(event);
+    setShowUpdateDialog(true);
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
@@ -48,6 +73,25 @@ export default function EventCard({ event }: { event: Event }) {
             {event.title}
           </h3>
           <p className="text-sm text-slate-600">{event.description}</p>
+          <p className="text-sm text-slate-600">{event.leader}</p>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => handleUpdate(event)}
+          >
+            <Pen size={24} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => handleDelete(event.id)}
+          >
+            <Trash size={24} />
+          </Button>
         </div>
       </div>
     </Card>
