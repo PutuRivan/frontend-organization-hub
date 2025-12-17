@@ -45,7 +45,6 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
                 : item.AbsentReason
                   ? item.AbsentReason
                   : "Default";
-
             return (
               <TableRow key={item.id}>
                 <TableCell>{item.name}</TableCell>
@@ -60,7 +59,7 @@ export default function AttendanceTable({ data }: AttendanceTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {!attendanceStatus && (
+                  {attendanceStatus === "Default" && (
                     <Link href={`/admin/absensi/create/${item.id}`}>
                       <Button variant="link" size="icon">
                         <Pencil />

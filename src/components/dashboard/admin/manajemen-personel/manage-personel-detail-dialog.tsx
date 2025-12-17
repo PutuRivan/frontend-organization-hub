@@ -7,34 +7,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { TInventory } from "@/libs/types";
-import InventoryDetailContent from "./inventory-detail-content";
+import type { TUser } from "@/libs/types";
+import ManagePersonelDetailContent from "./manage-personel-detail-content";
 
-interface InventoryDetailDialogProps {
+interface ManagePersonelDetailDialogProps {
   isDialogOpen: boolean;
-  selectedItem: TInventory | null;
+  selectedItem: TUser | null;
   handleDialogChange: (open: boolean) => void;
-  handleViewItem: (item: TInventory) => void
-  handleDeleteItem: (id: string) => void
+  handleDeleteItem: (id: string) => void;
+}
 
-};
-
-export default function InventoryDetailDialog({
+export default function ManagePersonelDetailDialog({
   isDialogOpen,
   handleDialogChange,
   selectedItem,
-  handleDeleteItem
-}: InventoryDetailDialogProps) {
+  handleDeleteItem,
+}: ManagePersonelDetailDialogProps) {
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent>
         {selectedItem && (
           <>
-            <DialogHeader className="space-y-1">
-              <DialogTitle>{selectedItem.item_name}</DialogTitle>
-            </DialogHeader>
-
-            <InventoryDetailContent selectedItem={selectedItem} />
+            <ManagePersonelDetailContent selectedItem={selectedItem} />
 
             <DialogFooter className="justify-between gap-2 sm:justify-end">
               <Button
@@ -46,9 +40,9 @@ export default function InventoryDetailDialog({
               </Button>
               <div className="flex gap-2">
                 <Link
-                  href={`/admin/inventaris-barang/update/${selectedItem.id}`}
+                  href={`/admin/manajemen-personel/update/${selectedItem.id}`}
                 >
-                  <Button>Edit Item</Button>
+                  <Button>Edit</Button>
                 </Link>
               </div>
             </DialogFooter>
