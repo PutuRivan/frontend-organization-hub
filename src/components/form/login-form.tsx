@@ -82,6 +82,7 @@ export default function LoginForm() {
                           placeholder="Enter your password"
                           type="password"
                           className="pl-10 h-12 text-base"
+                          autoComplete="off"
                           {...field}
                         />
                       </div>
