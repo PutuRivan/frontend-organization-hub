@@ -14,10 +14,11 @@ export default function InventoryDetailContent({ selectedItem }: InventoryDetail
         {selectedItem.image ? (
           <div className="relative h-48 w-48 overflow-hidden rounded-md">
             <Image
-              src={`${selectedItem.image}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}${selectedItem.image}`}
               alt={selectedItem.item_name}
               fill
               className="object-cover object-center"
+              unoptimized
             />
           </div>
         ) : (

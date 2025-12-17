@@ -26,9 +26,10 @@ export default function DbImagePreview({
       >
         <Image
           alt={`Preview`}
-          src={filePreviews}
+          src={`${process.env.NEXT_PUBLIC_API_URL}${filePreviews}`}
           className="h-full w-full object-cover"
           fill
+          unoptimized
         />
         <Button
           type="button"

@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
       },
       {
         hostname: "res.cloudinary.com"
-      }
+      },
+      {
+        protocol: "http",
+        hostname: "localhost:4000",
+        pathname: "/public/**",
+      },
     ]
   }
 };

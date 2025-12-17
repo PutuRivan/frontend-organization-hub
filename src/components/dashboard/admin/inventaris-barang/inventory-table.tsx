@@ -80,10 +80,11 @@ export default function InventoryTable({
                     {item.image ? (
                       <div className="relative h-14 w-14 rounded-md overflow-hidden mx-auto">
                         <Image
-                          src={`${item.image}`}
+                          src={`${process.env.NEXT_PUBLIC_API_URL}${item.image}`}
                           alt={item.item_name}
                           fill
                           className="object-cover object-center"
+                          unoptimized
                         />
                       </div>
                     ) : (

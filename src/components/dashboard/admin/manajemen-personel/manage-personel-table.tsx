@@ -86,7 +86,7 @@ export default function ManagePersonelTable({
                 {/* Nama */}
                 <TableCell className="flex items-center justify-center gap-3">
                   <Avatar>
-                    <AvatarImage src={person.image || ""} />
+                    <AvatarImage src={`${process.env.NEXT_PUBLIC_API_URL}${person.image}`} />
                     <AvatarFallback>{getInitials(person.name)}</AvatarFallback>
                   </Avatar>
                 </TableCell>
