@@ -258,6 +258,24 @@ export async function createPersonel(token: string, formData: FormData) {
   return responseData;
 }
 
+export async function updatePersonel(token: string, id: string, formData: FormData) {
+  const parsedToken = JSON.parse(token);
+
+  const res = await fetch(`${API_URL}/user/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${parsedToken}`,
+    },
+    body: formData,
+  });
+
+  const responseData = await res.json();
+
+  if (!res.ok) throw new Error("Gagal Mengupdate Data User");
+
+  return responseData;
+}
+
 export async function deletePersonel(token: string, id: string) {
   const parsedToken = JSON.parse(token);
 

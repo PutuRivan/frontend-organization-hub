@@ -22,16 +22,17 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/context/auth-context";
-import { createPersonel } from "@/libs/apis";
+import { updatePersonel } from "@/libs/apis";
 import { personelSchema, type TPersonelSchema } from "@/libs/schema";
 import { getAccessTokenFromCookie } from "@/libs/utils";
 import ImagePreview from "../../inventaris-barang/create/image-preview";
 
 interface IUpdatePersonelForm {
   data: TPersonelSchema;
+  personelId: string
 }
 
-export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
+export default function UpdatePersonelForm({ data, personelId }: IUpdatePersonelForm) {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -49,7 +50,7 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
       image: null,
       email: data.email,
       role: data.role,
-      status: data.status,
+      status: (data.status as unknown as string) === "Aktif",
     },
   });
 
@@ -95,9 +96,9 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
     });
     formData.append("userId", user.id);
     try {
-      const data = await createPersonel(token, formData);
-      if (!data.success) {
-        toast.error(data.message)
+      const response = await updatePersonel(token, personelId, formData);
+      if (!response.success) {
+        toast.error(response.message)
         return
       }
       toast.success("Personel berhasil ditambahkan");
@@ -109,6 +110,7 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
       setLoading(false);
     }
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -169,7 +171,7 @@ export default function UpdatePersonelForm({ data }: IUpdatePersonelForm) {
               </FormItem>
             )}
           />
-          {/* Nomor Telepon */}
+          {/* Password */}
           <FormField
             control={form.control}
             name="password"

@@ -17,13 +17,14 @@ export default async function page({
   return (
     <section className="p-5">
       <HeaderContent
-        title="Update Inventory Item"
+        title="Update Personel"
         description="Fill in the details below to update a new item to the inventory"
       />
 
       <Card className="mt-3 p-3">
         <UpdatePersonelForm
           data={data.data}
+          personelId={id}
         />
       </Card>
     </section>

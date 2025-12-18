@@ -48,7 +48,7 @@ export const personelSchema = z.object({
   image: z.any().optional(),
   jabatan: z.string().min(1, { message: 'Jabatan harus dipilih' }),
   password: z.string().min(1, { message: 'Password harus diisi' }),
-  status: z.enum(["Aktif", "Tidak_Aktif"]),
+  status: z.boolean(),
   role: z.string().optional(),
   pangkat: z.string(),
 })

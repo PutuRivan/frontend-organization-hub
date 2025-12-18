@@ -55,7 +55,7 @@ export default function ManageFilterContainer({
           <SelectContent>
             <SelectItem value="Semua">Status: Semua</SelectItem>
             <SelectItem value="Aktif">Status: Aktif</SelectItem>
-            <SelectItem value="Nonaktif">Status: Nonaktif</SelectItem>
+            <SelectItem value="Tidak_Aktif">Status: Tidak Aktif</SelectItem>
           </SelectContent>
         </Select>
       </div>
