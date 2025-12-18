@@ -164,7 +164,6 @@ export default function ManagePersonelTable({
       <ManagePersonelDetailDialog
         handleDeleteItem={handleDelete}
         handleDialogChange={handleDialogChange}
-        handleViewItem={handleViewItem}
         isDialogOpen={isDialogOpen}
         selectedItem={selectedItem}
       />

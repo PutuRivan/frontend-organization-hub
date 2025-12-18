@@ -4,8 +4,6 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import type { TUser } from "@/libs/types";
 import ManagePersonelDetailContent from "./manage-personel-detail-content";

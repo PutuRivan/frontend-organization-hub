@@ -1,17 +1,24 @@
 import Image from "next/image";
-import React from "react";
 import type { TUser } from "@/libs/types";
 
 interface ManagePersonelDetailContentProps {
   selectedItem: TUser;
 }
 
+
+
 export default function ManagePersonelDetailContent({
   selectedItem,
 }: ManagePersonelDetailContentProps) {
+  const detailItems = [
+    { label: "Nama", value: selectedItem.name },
+    { label: "NRP", value: selectedItem.nrp },
+    { label: "Jabatan", value: selectedItem.jabatan },
+    { label: "Email", value: selectedItem.email },
+  ];
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-      <div className="flex items-start justify-center rounded-lg bg-muted p-4">
+    <div className="flex flex-col">
+      <div className="flex items-start justify-center rounded-lg  p-4">
         {selectedItem.image ? (
           <div className="relative h-48 w-48 overflow-hidden rounded-md">
             <Image
@@ -28,32 +35,31 @@ export default function ManagePersonelDetailContent({
           </div>
         )}
       </div>
-      <div className="space-y-4 text-sm">
-        <div>
-          <p className="text-muted-foreground">Nama</p>
-          <p className="text-base font-medium">
-            {selectedItem.name || "-"}
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-muted-foreground">Jabatan</p>
-            <p className="font-medium">
-              {selectedItem.jabatan || "-"}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Email</p>
-            <p className="font-medium">
-              {selectedItem.email || "-"}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Posisi</p>
-            <p className="font-medium">{selectedItem.position}</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-2 gap-4">
+        {detailItems.map((item, index) => (
+          <DetailField
+            key={index}
+            label={item.label}
+            value={item.value}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
+
+interface DetailFieldProps {
+  label: string;
+  value?: string | null;
+};
+
+function DetailField({ label, value }: DetailFieldProps) {
+  return (
+    <div className="flex flex-col">
+      <h3 className="text-muted-foreground">{label}</h3>
+      <p className="text-base font-medium wrap-break-word">
+        {value || "-"}
+      </p>
     </div>
   );
 }
