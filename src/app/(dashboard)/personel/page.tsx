@@ -39,6 +39,7 @@ export default function Home() {
     created_at: dashboardData?.upcomingEvents[0]?.created_at,
     updated_at: dashboardData?.upcomingEvents[0]?.updated_at,
     id: dashboardData?.upcomingEvents[0]?.id,
+    visibility: dashboardData?.upcomingEvents[0]?.visibility,
   }
 
   return (

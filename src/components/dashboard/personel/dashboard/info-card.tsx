@@ -23,7 +23,7 @@ export function InfoCards({ user, events }: InfoCardsProps) {
       icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
       details: [
         { label: user?.attendance ? "Absen" : "Tidak Hadir", value: `${formatDateTime(user?.attendance?.time_in ?? "", "TIME")} - ${formatDateTime(user?.attendance?.time_out ?? "", "TIME")}` },
-        { label: user?.attendance?.absent_reason ? "Keterangan" : "", value: user?.attendance?.absent_reason ?? "" },
+        { label: user?.attendance?.AbsentReason ? "Keterangan" : "", value: user?.attendance?.AbsentReason ?? "" },
       ],
     },
     {
@@ -56,7 +56,7 @@ export function InfoCards({ user, events }: InfoCardsProps) {
                   <>
                     <p className="text-muted-foreground">{detail.label}</p>
                     <p className="font-medium text-foreground">
-                      {detail.value}
+                      {detail.value.toLocaleString()}
                     </p>
                   </>
                 ) : (
