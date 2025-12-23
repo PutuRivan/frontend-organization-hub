@@ -27,7 +27,7 @@ export default function ManageFilterContainer({
 }: ManageFilterContainerProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div className="flex-1">
+      <div className="w-full">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -50,7 +50,7 @@ export default function ManageFilterContainer({
           }}
         >
           <SelectTrigger className="bg-secondary">
-            <SelectValue />
+            <SelectValue placeholder="Filter berdasarkan status..." />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Semua">Status: Semua</SelectItem>

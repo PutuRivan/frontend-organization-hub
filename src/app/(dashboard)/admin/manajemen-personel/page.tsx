@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import ManageFilterContainer from "@/components/dashboard/admin/manajemen-personel/manage-filter-container";
 import ManagePersonelPagination from "@/components/dashboard/admin/manajemen-personel/manage-personel-pagination";
@@ -29,10 +29,21 @@ export default function Page() {
   const token = getAccessTokenFromCookie();
 
   const fetchUser = useCallback(
-    async (page: number) => {
+    async (page: number, name: string, status: string) => {
       try {
         setLoading(true);
-        const result = await getAllPersonel(token, page, UserPerPage);
+
+        // Prepare filter parameters
+        const statusParam = status === "Semua" ? "Aktif" : status;
+        const nameParam = name.trim() || undefined;
+
+        const result = await getAllPersonel(
+          token,
+          page,
+          UserPerPage,
+          statusParam,
+          nameParam,
+        );
 
         setData(result.data || []);
         setTotalItems(result.pagination.totalUser || 0);
@@ -47,29 +58,9 @@ export default function Page() {
     [token],
   );
 
-  // Filter data based on search query and status
-  const filteredPersonnel = useMemo(() => {
-    let filtered = data;
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const normalizedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter((user) =>
-        user.name.toLowerCase().includes(normalizedQuery),
-      );
-    }
-
-    // Filter by status
-    if (statusFilter !== "Semua") {
-      filtered = filtered.filter((user) => user.status === statusFilter);
-    }
-
-    return filtered;
-  }, [data, searchQuery, statusFilter]);
-
   useEffect(() => {
-    fetchUser(currentPage);
-  }, [currentPage, fetchUser]);
+    fetchUser(currentPage, searchQuery, statusFilter);
+  }, [currentPage, searchQuery, statusFilter, fetchUser]);
 
   return (
     <main className="min-h-screen bg-background px-5">
@@ -97,18 +88,18 @@ export default function Page() {
 
         {/* Table Section */}
         <ManagePersonelTable
-          personnel={filteredPersonnel}
+          personnel={data}
           loading={loading}
           token={token}
           pathname={pathname}
-          fetchUser={fetchUser}
+          fetchUser={() => fetchUser(currentPage, searchQuery, statusFilter)}
           currentPage={currentPage}
         />
 
         {/* Pagination Section */}
         <ManagePersonelPagination
           searchTerm={searchQuery}
-          filteredItems={filteredPersonnel}
+          filteredItems={data}
           currentPage={currentPage}
           itemsPerPage={UserPerPage}
           totalItems={totalItems}

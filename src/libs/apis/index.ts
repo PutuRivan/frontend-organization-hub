@@ -208,11 +208,18 @@ export async function getAllPersonel(
   token: string,
   page: number = 1,
   userPerPage: number = 10,
+  status: string = "Aktif",
+  name?: string,
 ) {
   const parsedToken = JSON.parse(token);
-
+  const params = new URLSearchParams();
+  params.append("page", page.toString());
+  params.append("limit", userPerPage.toString());
+  params.append("status", status);
+  params.append("name", name || "");
+  
   const res = await fetch(
-    `${API_URL}/users/personel?page=${page}&limit=${userPerPage}`,
+    `${API_URL}/users/personel?${params.toString()}`,
     {
       cache: "no-store",
       headers: {
