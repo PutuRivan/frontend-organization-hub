@@ -71,12 +71,6 @@ export default function Page() {
     fetchUser(currentPage);
   }, [currentPage, fetchUser]);
 
-  // Calculate pagination
-  const paginatedPersonnel = filteredPersonnel.slice(
-    (currentPage - 1) * UserPerPage,
-    currentPage * UserPerPage,
-  );
-
   return (
     <main className="min-h-screen bg-background px-5">
       <HeaderContent
@@ -103,7 +97,7 @@ export default function Page() {
 
         {/* Table Section */}
         <ManagePersonelTable
-          personnel={paginatedPersonnel}
+          personnel={filteredPersonnel}
           loading={loading}
           token={token}
           pathname={pathname}
